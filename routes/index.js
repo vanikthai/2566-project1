@@ -18,7 +18,7 @@ route.get("/register", (req, res) => {
   res.render("register.ejs");
 });
 
-route.get("/upload", ensureAuthenticated, (req, res) => {
+route.get("/upload", (req, res) => {
   res.render("upload.ejs");
 });
 route.post("/upload", (req, res) => {
