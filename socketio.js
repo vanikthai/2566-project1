@@ -4,10 +4,25 @@ module.exports = (io) => {
     socket.on("message",message);
   
     socket.on("upload", upload);
+
+    socket.on("deletepic", deletepic);
   
   });
 
 ////////////////////////////////////////////////
+  function deletepic(pic) {
+    
+    const fs = require('fs');
+    fs.unlink(__dirname+ '/public/uploads/'+ pic, function (err) {            
+         if (err) {                                                 
+          io.emit("message", err);                            
+         } else {
+           io.emit("message", pic + ' has been Deleted');                           
+         }                                                        
+     });    
+
+  }
+
   function message(msg) {
     console.log(msg);
     let payload = {
@@ -21,7 +36,7 @@ module.exports = (io) => {
   function upload(file) {
     let payload = {
       msg : "uploaded!!",
-      file
+      ...file
     }
     io.emit("upload", payload);
   }

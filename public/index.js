@@ -1,6 +1,7 @@
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 const socket = io();
-
+import Picture from  "./controls/pictures.js"
+const picture = new Picture("#pictures")
 // const sendmsg = document.getElementById("sendmsg");
 // sendmsg.addEventListener("submit", (e) => {
 //   e.preventDefault();
@@ -18,5 +19,10 @@ const socket = io();
 // });
 
 socket.on("upload", (msg) => {
+  picture.addEntry(msg)
+  console.log(msg);
+});
+
+socket.on("message", (msg) => {
   console.log(msg);
 });

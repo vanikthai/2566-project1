@@ -49,6 +49,7 @@ export default class Upload {
 
   loadall(file) {
     for (var i = 0; i < file.length; i++) {
+     
       this.loadEatch(i, file[i]);
     }
   }
@@ -61,6 +62,7 @@ export default class Upload {
       return str
     }
     let vname = await getFileName(file.name)
+    
     await this.root
       .querySelector(".parea")
       .insertAdjacentHTML("beforeend", Upload.entryHtml(id, vname));
@@ -73,10 +75,10 @@ export default class Upload {
     fread.onload = async (ev) => {
       const CHANK_SIZE = 1000;
       const chankCount = ev.target.result.byteLength / CHANK_SIZE;
-      const filename = file.name;
       const fname = file.name.split(".");
+      const lastname = file.type;
       const newname = uuid() + "." + fname[fname.length - 1];
-
+      console.log(file.type);
       for (let chankId = 0; chankId < chankCount; chankId++) {
         const chauk = ev.target.result.slice(
           chankId * CHANK_SIZE,
@@ -110,7 +112,11 @@ export default class Upload {
       };
 
       this.updateEntry(payload);
-      Upload.sendIO(newname)
+      let paySend = {
+        filename: newname,
+        type: lastname
+      }
+      Upload.sendIO(paySend)
     };
   }
 }

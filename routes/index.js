@@ -22,7 +22,7 @@ route.get("/upload", (req, res) => {
   res.render("upload.ejs");
 });
 route.post("/upload", (req, res) => {
-  const filename = "./uploads/" + req.headers["file-name"];
+  const filename = "./public/uploads/" + req.headers["file-name"];
   req.on("data", (chunk) => {
     fs.appendFileSync(filename, chunk);
   });
