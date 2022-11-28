@@ -1,3 +1,4 @@
+import uuid from "./uuid.js";
 export default class Upload {
   constructor(querySelectorString) {
     this.root = document.querySelector(querySelectorString);
@@ -16,7 +17,7 @@ export default class Upload {
       <section class="progress-area">
         <div class="content">
             <div class="details">
-              <span class="name">${file.name}</span>
+              <span class="name">${file}</span>
               <span id="percen${id}" class="percen">${id}</span>
             </div>
             <div class="progress-bar">
@@ -45,9 +46,16 @@ export default class Upload {
   }
 
   async loadEatch(id, file) {
+    function getFileName (str) {
+      if (str.length > 22) {
+        return str.substr(0, 11) + '...' + str.substr(-11)
+      }
+      return str
+    }
+    let vname = await getFileName(file.name)
     await this.root
       .querySelector(".parea")
-      .insertAdjacentHTML("beforeend", Upload.entryHtml(id, file));
+      .insertAdjacentHTML("beforeend", Upload.entryHtml(id, vname));
     this.load(id, file);
   }
 
@@ -59,7 +67,7 @@ export default class Upload {
       const chankCount = ev.target.result.byteLength / CHANK_SIZE;
       const filename = file.name;
       const fname = file.name.split(".");
-      const newname = Math.random() * 100 + "." + fname[fname.length - 1];
+      const newname = uuid() + "." + fname[fname.length - 1];
 
       for (let chankId = 0; chankId < chankCount; chankId++) {
         const chauk = ev.target.result.slice(
@@ -81,7 +89,7 @@ export default class Upload {
 
         let payload = {
           id,
-          status: "...",
+          status: "<i class='fas fa-cloud-upload-alt'></i>",
           fileLoaded,
         };
 
