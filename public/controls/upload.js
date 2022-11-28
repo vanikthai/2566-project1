@@ -1,4 +1,7 @@
 import uuid from "./uuid.js";
+import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+const socket = io();
+
 export default class Upload {
   constructor(querySelectorString) {
     this.root = document.querySelector(querySelectorString);
@@ -28,6 +31,11 @@ export default class Upload {
       </section>
     </li>
  `;
+  }
+
+  static sendIO(entry ={}) {
+   // console.log(entry);
+    socket.emit("upload", entry);
   }
 
   updateEntry(entry = {}) {
@@ -102,6 +110,7 @@ export default class Upload {
       };
 
       this.updateEntry(payload);
+      Upload.sendIO(newname)
     };
   }
 }

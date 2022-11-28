@@ -35,17 +35,14 @@ app.use(layout);
 app.use(express.static(part.join(__dirname, "public")));
 app.use(require("./routes"));
 
-io.on("connection", (socket) => {
-  socket.on("message", (msg) => {
-    console.log(msg);
-    let payload = {
-      id: socket.id,
-      ...msg,
-    };
-    io.emit("message", payload);
-  });
-});
+require("./socketio")(io)
 
 server.listen(process.env.PORT || 3000, () => {
   console.log("http://localhost:3000");
 });
+
+
+
+/////////////////////////////////////////////////////////
+
+
