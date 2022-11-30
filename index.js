@@ -3,7 +3,21 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const io = new Server(server,{
+  serveClient: true,
+  origins: '*:*',
+  transports: ['polling'],  
+  pingInterval: 60000,
+  pingTimeout: 25000,
+  cookie: true,
+  cors: {
+      origin: "http://vanikthai.com",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["vanikthaiapp"],
+      credentials: true
+    }
+});
+
 const layout = require("express-ejs-layouts");
 const part = require("path");
 const session = require("express-session");
@@ -36,10 +50,8 @@ app.use(express.static(part.join(__dirname, "public")));
 app.use(require("./routes"));
 
 require("./socketio")(io)
-
-server.listen(process.env.PORT || 3000, () => {
-  console.log("http://localhost:3000");
-});
+ 
+server.listen();
 
 
 

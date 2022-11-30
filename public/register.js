@@ -1,5 +1,4 @@
-import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-const socket = io();
+import socket from "./controls/socket.js";
 const register = document.getElementById("register");
 register.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -9,10 +8,15 @@ register.addEventListener("submit", (e) => {
     username,
     password,
   };
-  console.log(payload);
-   socket.emit("register",payload)
+  socket.emit("register", payload);
 });
 
 socket.on("message", (msg) => {
   console.log(msg);
+
+  if (msg.sqlMessage) {
+    alert("ชื่อผู้ใช้ซ้ำ " + msg.sqlMessage);
+    return;
+  }
+  window.location.href = "http://vanikthai.com/";
 });

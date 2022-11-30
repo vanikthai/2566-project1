@@ -73,7 +73,7 @@ export default class Upload {
     const fread = new FileReader();
     fread.readAsArrayBuffer(file);
     fread.onload = async (ev) => {
-      const CHANK_SIZE = 5000;
+      const CHANK_SIZE = 10000;
       const chankCount = ev.target.result.byteLength / CHANK_SIZE;
       const fname = file.name.split(".");
       const lastname = file.type;
@@ -85,7 +85,7 @@ export default class Upload {
           chankId * CHANK_SIZE + CHANK_SIZE
         );
 
-        await fetch("http://localhost:3000/upload", {
+        await fetch("http://vanikthai.com/upload", { 
           method: "POST",
           headers: {
             "content-type": "application/octec-stream",
@@ -101,7 +101,7 @@ export default class Upload {
           id,
           status: "<i class='fas fa-cloud-upload-alt'></i>",
           fileLoaded,
-        };
+        };  
 
         this.updateEntry(payload);
       }
