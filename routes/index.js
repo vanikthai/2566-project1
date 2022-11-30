@@ -30,5 +30,6 @@ route.post("/upload", (req, res) => {
 });
 
 route.post("/login", require("./login"));
+//route.post("/register", require("./register"));
 route.get("/logout", require("./logout"));
 module.exports = route;

@@ -73,7 +73,7 @@ export default class Upload {
     const fread = new FileReader();
     fread.readAsArrayBuffer(file);
     fread.onload = async (ev) => {
-      const CHANK_SIZE = 1000;
+      const CHANK_SIZE = 5000;
       const chankCount = ev.target.result.byteLength / CHANK_SIZE;
       const fname = file.name.split(".");
       const lastname = file.type;
@@ -90,7 +90,7 @@ export default class Upload {
           headers: {
             "content-type": "application/octec-stream",
             "content-length": chauk.length,
-            "file-name": newname,
+            "file-name": "_delete_" + newname,
           },
           body: chauk,
         });
