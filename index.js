@@ -3,19 +3,19 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server,{
+const io = new Server(server, {
   serveClient: true,
-  origins: '*:*',
-  transports: ['polling'],  
+  origins: "*:*",
+  transports: ["polling"],
   pingInterval: 60000,
   pingTimeout: 25000,
   cookie: true,
   cors: {
-      origin: "http://vanikthai.com",
-      methods: ["GET", "POST"],
-      allowedHeaders: ["vanikthaiapp"],
-      credentials: true
-    }
+    origin: "http://vanikthai.com",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["vanikthaiapp"],
+    credentials: true,
+  },
 });
 
 const layout = require("express-ejs-layouts");
@@ -49,12 +49,8 @@ app.use(layout);
 app.use(express.static(part.join(__dirname, "public")));
 app.use(require("./routes"));
 
-require("./socketio")(io)
- 
+require("./socketio")(io);
+
 server.listen();
 
-
-
 /////////////////////////////////////////////////////////
-
-

@@ -1,21 +1,12 @@
 import socket from "./controls/socket.js";
 import Picture from "./controls/pictures.js";
+import Loadpic from "./controls/loadpic.js";
 const picture = new Picture("#pictures");
-//const sendmsg = document.getElementById("sendmsg");
-// sendmsg.addEventListener("submit", (e) => {
-//   e.preventDefault();
-//   let email = document.getElementById("email").value;
-//   let password = document.getElementById("pwd").value;
+const loadpic = new Loadpic("#pictures");
 
-//   let payload = {
-//     email,
-//     password,
-//   };
-
-//   socket.emit("login", payload);
-
-//   sendmsg.reset();
-// });
+document.addEventListener("DOMContentLoaded", () => {
+  socket.emit("loadstart", 30);
+});
 
 socket.on("upload", (msg) => {
   picture.addEntry(msg);
@@ -24,4 +15,9 @@ socket.on("upload", (msg) => {
 
 socket.on("message", (msg) => {
   console.log(msg);
+});
+
+socket.on("loadlast", (msg) => {
+  //console.log(msg);
+  loadpic.load(msg);
 });

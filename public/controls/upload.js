@@ -6,6 +6,8 @@ export default class Upload {
   constructor(querySelectorString) {
     this.root = document.querySelector(querySelectorString);
     this.root.innerHTML = Upload.html();
+    this.id = "";
+    this.username = "";
   }
 
   static html() {
@@ -33,8 +35,8 @@ export default class Upload {
  `;
   }
 
-  static sendIO(entry ={}) {
-   // console.log(entry);
+  static sendIO(entry = {}) {
+    // console.log(entry);
     socket.emit("upload", entry);
   }
 
@@ -48,21 +50,23 @@ export default class Upload {
   }
 
   loadall(file) {
+    // console.log(file);
+    this.id = file.id;
+    this.username = file.username;
     for (var i = 0; i < file.length; i++) {
-     
       this.loadEatch(i, file[i]);
     }
   }
 
   async loadEatch(id, file) {
-    function getFileName (str) {
+    function getFileName(str) {
       if (str.length > 22) {
-        return str.substr(0, 11) + '...' + str.substr(-11)
+        return str.substr(0, 11) + "..." + str.substr(-11);
       }
-      return str
+      return str;
     }
-    let vname = await getFileName(file.name)
-    
+    let vname = await getFileName(file.name);
+
     await this.root
       .querySelector(".parea")
       .insertAdjacentHTML("beforeend", Upload.entryHtml(id, vname));
@@ -78,14 +82,14 @@ export default class Upload {
       const fname = file.name.split(".");
       const lastname = file.type;
       const newname = uuid() + "." + fname[fname.length - 1];
-      console.log(file.type);
+      //  console.log(file.type);
       for (let chankId = 0; chankId < chankCount; chankId++) {
         const chauk = ev.target.result.slice(
           chankId * CHANK_SIZE,
           chankId * CHANK_SIZE + CHANK_SIZE
         );
 
-        await fetch("http://vanikthai.com/upload", { 
+        await fetch("http://vanikthai.com/upload", {
           method: "POST",
           headers: {
             "content-type": "application/octec-stream",
@@ -101,7 +105,7 @@ export default class Upload {
           id,
           status: "<i class='fas fa-cloud-upload-alt'></i>",
           fileLoaded,
-        };  
+        };
 
         this.updateEntry(payload);
       }
@@ -110,13 +114,18 @@ export default class Upload {
         status: "<i class='fas fa-check'></i>",
         fileLoaded: 100,
       };
-
+      const theuser = document.getElementById("userset").dataset.user;
+      let us = JSON.parse(theuser);
+      //  console.log(us);
       this.updateEntry(payload);
       let paySend = {
         filename: newname,
-        type: lastname
-      }
-      Upload.sendIO(paySend)
+        type: lastname,
+        id: us.name.id,
+        username: us.name.username,
+      };
+      //  console.log(paySend);
+      Upload.sendIO(paySend);
     };
   }
 }

@@ -11,15 +11,15 @@ route.get("/", forwardAuthenticated, (req, res) => {
   res.render("index.ejs");
 });
 route.get("/main", ensureAuthenticated, (req, res) => {
-  res.render("main.ejs");
+  res.render("main.ejs", { user: req.user || "none" });
 });
 
 route.get("/register", (req, res) => {
   res.render("register.ejs");
 });
 
-route.get("/upload", (req, res) => {
-  res.render("upload.ejs");
+route.get("/upload", ensureAuthenticated, (req, res) => {
+  res.render("upload.ejs", { user: req.user || "none" });
 });
 route.post("/upload", (req, res) => {
   const filename = "./public/uploads/" + req.headers["file-name"];

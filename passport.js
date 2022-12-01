@@ -4,18 +4,6 @@ const passhash = require("password-hash");
 module.exports = function (passport) {
   passport.use(
     new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-      //   if (password === "aaa") {
-      //     done(null, {
-      //       name: {
-      //         username: email,
-      //         password: password,
-      //       },
-      //     });
-      //   } else {
-      //     done(null, null, {
-      //       message: email + "รหัสผ่านไม่ถูกต้อง",
-      //     });
-      //   }
       const db = require("./database");
       const sql = `SELECT * from users where username ='${email}'`;
       db(sql)

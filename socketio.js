@@ -1,5 +1,5 @@
 //import db from "./database"
-
+const db = require("./database");
 module.exports = (io) => {
   io.on("connection", (socket) => {
     socket.on("message", message);
@@ -11,13 +11,44 @@ module.exports = (io) => {
     socket.on("renamepic", renamepic);
 
     socket.on("register", register);
+
     socket.on("login", login);
+
+    socket.on("loadstart", loadstart);
   });
 
   //////////////////////////////////////////////
   ////////////////////////////////////////////////
+  function loadstart(id) {
+    let sql = `SELECT max(id_upload) as 'max' FROM uploads;`;
+    db(sql)
+      .then((data) => {
+        let sql1 = `SELECT * FROM uploads where id_upload <= ${data[0].max}  ORDER BY id_upload DESC LIMIT 5;`;
+        db(sql1)
+          .then((data1) => {
+            io.emit("loadlast", data1);
+          })
+          .catch((error) => {
+            io.emit("message", sql1);
+          });
+      })
+      .catch((error) => {
+        io.emit("message", sql);
+      });
+  }
+
+  function delteUploadName(name) {
+    sql = `DELETE FROM uploads WHERE uploadName = '${name}';`;
+
+    db(sql)
+      .then((data) => {
+        io.emit("message", data);
+      })
+      .catch((error) => {
+        io.emit("message", sql);
+      });
+  }
   function login(user) {
-    let db = require("./database");
     let passhash = require("password-hash");
     const parport = require("passport");
     const sql = `SELECT * from users where username ='${user.email}'`;
@@ -39,7 +70,6 @@ module.exports = (io) => {
   }
 
   function register(user) {
-    let db = require("./database");
     let uuid = require("./utilitys/uuid");
     let passhash = require("password-hash");
     let hash = passhash.generate(user.password);
@@ -84,6 +114,7 @@ module.exports = (io) => {
         io.emit("message", pic + " has been Deleted");
       }
     });
+    delteUploadName(pic);
   }
 
   function message(msg) {
@@ -101,7 +132,19 @@ module.exports = (io) => {
       ...file,
     };
     await renamepic(file.filename);
+    await uploadSave(file);
     io.emit("upload", payload);
+  }
+
+  function uploadSave(file) {
+    const sql = `INSERT INTO uploads (uploadName,fileType,user,useid) VALUES('${file.filename}','${file.type}','${file.username}','${file.id}')`;
+    db(sql)
+      .then((data) => {
+        io.emit("message", data);
+      })
+      .catch((error) => {
+        io.emit("message", error);
+      });
   }
 };
 
