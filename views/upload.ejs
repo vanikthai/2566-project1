@@ -5,7 +5,14 @@
 <div id="drop-area" class="wrapper">
   <header>File Uploader <%= user.name.username %></header>
   <form action="#">
-    <input class="file-input" type="file" name="file" multiple hidden />
+    <input
+      class="file-input"
+      type="file"
+      name="file"
+      multiple
+      hidden
+      maxlength="10"
+    />
     <i class="fas fa-cloud-upload-alt"></i>
     <p>Browse File to Upload</p>
   </form>

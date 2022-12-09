@@ -23,13 +23,10 @@ export default class BudgetTracker {
     return `
             <tr>
                 <td>
-                    <div id="picture" > </div
+                    <button type="button"  class="btn-rounded" id="btnDel" style="position: absolute;z-index: 2;right:10px;border-radius: 50%;"><i id="btnData"  class="fa fa-trash" aria-hidden="true"></i></button>
+                    <div id="picture" >
+                    </div>
                 </td>
-                <td>
-                <div id="datadel"></div>
-                <button type="button" id="btnDel" class="delete-entry">&#10005;</button>
-                </td>
-               
             </tr>
         `;
   }
@@ -49,21 +46,22 @@ export default class BudgetTracker {
     let row = this.root.querySelector(".entries tr:last-of-type");
 
     let type = entry.fileType.split("/");
-
     if (type[0] === "image") {
       row.querySelector("#picture").innerHTML =
         `
-            <span>${entry.fileType}</span>
-            <img src='uploads/${entry.uploadName}' width='300' >
+        <div  data-src='uploads/${entry.uploadName}' >
+        <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+        </div>
+        </div>
             ` || "";
     } else {
       row.querySelector("#picture").innerHTML =
         `
-            <span>${type[0]}</span>
            <a target='_new' href='uploads/${entry.uploadName}' >${type[0]}</a>
             ` || "";
     }
-    row.querySelector("#btnDel").dataset.pic = entry.uploadName;
+    row.querySelector("#btnData").dataset.pic = entry.uploadName;
     row.querySelector("#btnDel").addEventListener("click", (e) => {
       this.onDeleteEntryBtnClick(e);
     });
@@ -72,8 +70,21 @@ export default class BudgetTracker {
   save(e) {}
 
   onDeleteEntryBtnClick(e) {
-    // console.log(e.target.dataset.pic);
+    if (!e.target.dataset.pic) return;
+
     socket.emit("deletepic", e.target.dataset.pic);
     e.target.closest("tr").remove();
+  }
+  async loadImage(imageUrl) {
+    let img;
+    const imageLoadPromise = new Promise((resolve) => {
+      img = new Image();
+      img.onload = resolve;
+      img.src = imageUrl;
+    });
+
+    await imageLoadPromise;
+    console.log("image loaded");
+    return img;
   }
 }

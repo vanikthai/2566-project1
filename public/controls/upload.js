@@ -36,7 +36,7 @@ export default class Upload {
   }
 
   static sendIO(entry = {}) {
-    // console.log(entry);
+    console.log(entry);
     socket.emit("upload", entry);
   }
 

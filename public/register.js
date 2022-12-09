@@ -8,6 +8,27 @@ register.addEventListener("submit", (e) => {
     username,
     password,
   };
+  // const payload = {};
+  // Object.defineProperty(payload, "user", {
+  //   get() {
+  //     return username.value;
+  //   },
+  //   set(_user) {
+  //     return (username.value = _user);
+  //   },
+  // });
+
+  // Object.defineProperty(payload, "password", {
+  //   get() {
+  //     return password.value;
+  //   },
+  //   set(_pass) {
+  //     return (password.value = _pass);
+  //   },
+  // });
+  //console.log(payload);
+  // payload.user = "ccc";
+  //  payload.password = "cc";
   socket.emit("register", payload);
 });
 
