@@ -16,16 +16,22 @@ export default class BudgetTracker {
                     </tr>
                 </thead>
                 <tbody class="entries"></tbody>
+                <tfoot class="pagesentries">
+                  <tr>
+                <td>
+                  <div id="page">สิ้นสุดข้อมูล</div>
+                </td>
+            </tr>
+                </tfoot>
         `;
   }
 
   static entryHtml() {
     return `
             <tr>
-                <td>
+                <td style="height:300px">
                     <button type="button"  class="btn-rounded" id="btnDel" style="position: absolute;z-index: 2;right:10px;border-radius: 50%;"><i id="btnData"  class="fa fa-trash" aria-hidden="true"></i></button>
-                    <div id="picture" >
-                    </div>
+                    <div id="picture"></div>
                 </td>
             </tr>
         `;
@@ -49,6 +55,7 @@ export default class BudgetTracker {
     if (type[0] === "image") {
       row.querySelector("#picture").innerHTML =
         `
+        ${entry.id_upload}
         <div  data-src='uploads/${entry.uploadName}' >
         <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -62,6 +69,8 @@ export default class BudgetTracker {
             ` || "";
     }
     row.querySelector("#btnData").dataset.pic = entry.uploadName;
+    this.root.querySelector("#page").dataset.page = entry.page;
+    this.root.querySelector("#page").dataset.total = entry.tpages;
     row.querySelector("#btnDel").addEventListener("click", (e) => {
       this.onDeleteEntryBtnClick(e);
     });
@@ -80,6 +89,7 @@ export default class BudgetTracker {
     const imageLoadPromise = new Promise((resolve) => {
       img = new Image();
       img.onload = resolve;
+      img.classList = "img-fluid";
       img.src = imageUrl;
     });
 

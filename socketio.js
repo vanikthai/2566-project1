@@ -18,11 +18,18 @@ module.exports = (io) => {
 
     ///////////////////////////////////////////////////////////
 
-    function loadstart(id) {
-      let sql = `SELECT max(id_upload) as 'max' FROM uploads;`;
+    function loadstart(page, pages) {
+      let sql = `SELECT count(id_upload) as 'max' FROM uploads;`;
       db(sql)
         .then((data) => {
-          let sql1 = `SELECT * FROM uploads where id_upload <= ${data[0].max}  ORDER BY id_upload DESC;`;
+          let totalpages = Math.round(data[0].max / pages);
+          let nexpage = page * pages;
+          let sql1;
+          if (page == 0) {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM uploads  ORDER BY id_upload DESC LIMIT ${page},${pages};`;
+          } else {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM uploads  ORDER BY id_upload DESC LIMIT ${nexpage},${pages};`;
+          }
           db(sql1)
             .then((data1) => {
               socket.emit("loadlast", data1);

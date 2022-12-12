@@ -3,9 +3,10 @@ import Picture from "./controls/pictures.js";
 import Loadpic from "./controls/loadpic.js";
 const picture = new Picture("#pictures");
 const loadpic = new Loadpic("#pictures");
+const perpage = 10;
 
 document.addEventListener("DOMContentLoaded", () => {
-  socket.emit("loadstart", 30);
+  socket.emit("loadstart", 0, perpage);
 });
 
 socket.on("upload", (msg) => {
@@ -34,10 +35,6 @@ socket.on("loadlast", async (msg) => {
   function preloadingimage(img) {
     let src = img.getAttribute("data-src");
     if (!src) return;
-    // console.log(src);
-
-    //  img.src = src;
-
     loadImage(src).then((images) => {
       img.innerHTML = images.outerHTML;
     });
@@ -46,6 +43,26 @@ socket.on("loadlast", async (msg) => {
   images.forEach((image) => {
     imgobseve.observe(image);
   });
+
+  ///////////////////////////////
+  const epage = document.getElementById("page");
+  const pageobseve = new IntersectionObserver((entrys, Observe) => {
+    entrys.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      loadnextpage(entry.target);
+      pageobseve.unobserve(entry.target);
+    });
+  }, imageOption);
+
+  function loadnextpage(page) {
+    let nextpage = page.getAttribute("data-page");
+    nextpage++;
+    let totalpage = page.getAttribute("data-total");
+    if (nextpage > totalpage - 1) return;
+    socket.emit("loadstart", nextpage, perpage);
+  }
+
+  pageobseve.observe(epage);
 });
 
 async function loadImage(imageUrl) {
