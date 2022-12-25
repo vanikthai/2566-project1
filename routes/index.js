@@ -14,6 +14,8 @@ route.get("/main", ensureAuthenticated, (req, res) => {
   res.render("main.ejs", { user: req.user || "none" });
 });
 
+route.get("/filemissing", ensureAuthenticated, require("./filemissing"));
+
 route.get("/register", (req, res) => {
   res.render("register.ejs");
 });

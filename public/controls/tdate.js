@@ -1,5 +1,5 @@
-function datetime() {
-  let dateObj = new Date();
+function datetime(Obj) {
+  let dateObj = new Date(Obj);
   let hhr = dateObj.getHours() || 12;
   let monthNames = [
     "มกราคม",

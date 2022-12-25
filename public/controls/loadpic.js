@@ -1,4 +1,5 @@
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+import tdate from "./tdate.js";
 const socket = io();
 
 export default class BudgetTracker {
@@ -11,17 +12,17 @@ export default class BudgetTracker {
     return `
             <table class="budget-tracker">
                 <thead>
-                    <tr>
-                        <th>pictures</th>
-                    </tr>
+                  <tr>
+                    <th>pictures</th>
+                  </tr>
                 </thead>
                 <tbody class="entries"></tbody>
                 <tfoot class="pagesentries">
                   <tr>
-                <td>
-                  <div id="page">สิ้นสุดข้อมูล</div>
-                </td>
-            </tr>
+                    <td>
+                      <div id="page">สิ้นสุดข้อมูล</div>
+                    </td>
+                  </tr>
                 </tfoot>
         `;
   }
@@ -31,6 +32,7 @@ export default class BudgetTracker {
             <tr>
                 <td style="height:300px">
                     <button type="button"  class="btn-rounded" id="btnDel" style="position: absolute;z-index: 2;right:10px;border-radius: 50%;"><i id="btnData"  class="fa fa-trash" aria-hidden="true"></i></button>
+                    <button type="button"  class="btn-rounded" id="btnDownload" style="position: absolute;z-index: 2;right:50px;border-radius: 50%;"><i id="btnDataDownload"  class="fa fa-download" aria-hidden="true"></i></button>
                     <div id="picture"></div>
                 </td>
             </tr>
@@ -38,11 +40,48 @@ export default class BudgetTracker {
   }
 
   load(entries) {
-    BudgetTracker.entryHtml();
+    // BudgetTracker.entryHtml();
     for (const entry of entries) {
-      // console.log(entry);
       this.addEntry(entry);
     }
+  }
+
+  addNew(entry = {}) {
+    this.root
+      .querySelector(".entries")
+      .insertAdjacentHTML("afterbegin", BudgetTracker.entryHtml());
+    row = this.root.querySelector(".entries tbody:first-of-type");
+
+    let type = entry.fileType.split("/");
+    let sdate = tdate(entry.date);
+    if (type[0] === "image") {
+      row.querySelector("#picture").innerHTML =
+        `
+        ${entry.user}[${entry.id_upload}] ${sdate}
+        <div  data-src='uploads/${entry.uploadName}' >
+        <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+        </div> 
+        </div> 
+            ` || "";
+    } else {
+      row.querySelector("#picture").innerHTML =
+        `<a target='_new' href='uploads/${entry.uploadName}' download >${type[0]}</a>` ||
+        "";
+    }
+    row.querySelector("#btnDownload").dataset.pic = entry.uploadName;
+    row.querySelector("#btnDataDownload").dataset.pic = entry.uploadName;
+    row.querySelector("#btnData").dataset.pic = entry.uploadName;
+    this.root.querySelector("#page").dataset.page = entry.page;
+    this.root.querySelector("#page").dataset.total = entry.tpages;
+    row.querySelector("#btnDel").addEventListener("click", (e) => {
+      let text = "(ต้องการลบข้อมุลหรือไม่!";
+      if (confirm(text) == true) this.onDeleteEntryBtnClick(e);
+    });
+    row.querySelector("#btnDownload").addEventListener("click", (e) => {
+      console.log("bonclick");
+      this.onDownloadEntryBtnClick(e);
+    });
   }
 
   addEntry(entry = {}) {
@@ -50,29 +89,36 @@ export default class BudgetTracker {
       .querySelector(".entries")
       .insertAdjacentHTML("beforeend", BudgetTracker.entryHtml());
     let row = this.root.querySelector(".entries tr:last-of-type");
-
     let type = entry.fileType.split("/");
+    let sdate = tdate(entry.date);
     if (type[0] === "image") {
       row.querySelector("#picture").innerHTML =
         `
-        ${entry.id_upload}
+        ${entry.user}[${entry.id_upload}] ${sdate}
         <div  data-src='uploads/${entry.uploadName}' >
         <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
         </div>
-        </div>
+        </div> 
             ` || "";
     } else {
       row.querySelector("#picture").innerHTML =
-        `
-           <a target='_new' href='uploads/${entry.uploadName}' >${type[0]}</a>
-            ` || "";
+        `<a target='_new' href='uploads/${entry.uploadName}' download >${type[0]}</a>` ||
+        "";
     }
+    row.querySelector("#btnDownload").dataset.pic = entry.uploadName;
+    row.querySelector("#btnDataDownload").dataset.pic = entry.uploadName;
     row.querySelector("#btnData").dataset.pic = entry.uploadName;
+    row.querySelector("#btnDel").dataset.pic = entry.uploadName;
     this.root.querySelector("#page").dataset.page = entry.page;
     this.root.querySelector("#page").dataset.total = entry.tpages;
     row.querySelector("#btnDel").addEventListener("click", (e) => {
-      this.onDeleteEntryBtnClick(e);
+      let text = "(ต้องการลบข้อมุลหรือไม่!";
+      if (confirm(text) == true) this.onDeleteEntryBtnClick(e);
+    });
+    row.querySelector("#btnDownload").addEventListener("click", (e) => {
+      console.log("bonclick");
+      this.onDownloadEntryBtnClick(e);
     });
   }
 
@@ -84,17 +130,22 @@ export default class BudgetTracker {
     socket.emit("deletepic", e.target.dataset.pic);
     e.target.closest("tr").remove();
   }
-  async loadImage(imageUrl) {
-    let img;
-    const imageLoadPromise = new Promise((resolve) => {
-      img = new Image();
-      img.onload = resolve;
-      img.classList = "img-fluid";
-      img.src = imageUrl;
-    });
 
-    await imageLoadPromise;
-    console.log("image loaded");
-    return img;
+  onDownloadEntryBtnClick(e) {
+    let pname = e.target.dataset.pic;
+    if (!pname) return;
+    let a = document.createElement("a");
+    a.href = "/uploads/" + pname;
+    a.download = pname;
+    a.click();
+  }
+
+  onDeleteRes(data) {
+    let pics = this.root.querySelector("btnDel");
+    pics.forEach((pic) => {
+      if (data !== pic.dataset.pic) return;
+      console.log(pic.dataset.pic);
+      pic.target.closest("tr").remove();
+    });
   }
 }

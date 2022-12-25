@@ -8,15 +8,24 @@ form.addEventListener("click", () => {
 });
 
 fileInput.onchange = async ({ target }) => {
-  if (target.files.length > 5) {
-    alert("เลือกส่งได้ครั้งละ 5 files ครับ");
+  if (target.files.length > 20) {
+    alert("เลือกส่งได้ครั้งละ 20 files ครับ");
     target.preventDefault();
     return;
   }
 
   let file = target.files; //getting file [0] this means if user has selected multiple files then get first one only
-  let upfile = new Upload("#app");
-  upfile.loadall(file);
+  let app = document.getElementById("app");
+  let newloadname = "app" + Math.round(Math.random() * 400);
+  let newload = document.createElement("div");
+  newload.id = newloadname;
+  newload.innerText = "newupload";
+  app.appendChild(newload);
+
+  setTimeout(() => {
+    let upfile = new Upload(`#${newloadname}`);
+    upfile.loadall(file);
+  }, 100);
 };
 
 let dropArea = document.getElementById("drop-area");

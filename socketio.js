@@ -96,7 +96,10 @@ module.exports = (io) => {
         if (err) {
           io.emit("message", err);
         } else {
-          io.emit("message", pic + " has been Deleted");
+          io.emit("deletePicture", {
+            pic,
+            msg: " has been Deleted",
+          });
         }
       });
       delteUploadName(pic);

@@ -6,18 +6,53 @@ const loadpic = new Loadpic("#pictures");
 const perpage = 10;
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (!window.Notification) {
+    console.log("Browser does not support notifications.");
+  } else {
+    console.log("Browser does support notifications.");
+    console.log(window.Notification.permission);
+    if (window.Notification.permission === "granted") {
+      console.log("We have permission!");
+    } else if (window.Notification.permission !== "denied") {
+      window.Notification.requestPermission().then((permission) => {
+        console.log(permission);
+      });
+    }
+    // display message here
+  }
   socket.emit("loadstart", 0, perpage);
 });
 
+function showMsg(msg, title = "vanikthai.com") {
+  let myToastEl = document.getElementById("liveToast");
+  let ToastText = document.getElementById("toastbody");
+  let toastheader = document.getElementById("toastheader");
+  ToastText.innerHTML = msg;
+  toastheader.innerText = title;
+  let myToast = new bootstrap.Toast(myToastEl);
+  myToast.show();
+}
+////////////////////////////
 socket.on("upload", (msg) => {
+  let newmsg = msg.username + " เพิ่มภาพ";
+  showMsg(newmsg, "เพิ่มข้อมูล");
   picture.addEntry(msg);
-  console.log(msg);
+});
+
+socket.on("deletePicture", (msg) => {
+  showMsg(msg.pic, "ลบข้อมูล");
+  let pics = document.querySelectorAll("#btnDel");
+  pics.forEach((pic) => {
+    if (msg.pic !== pic.dataset.pic) return;
+    console.log(pic.dataset.pic);
+    pic.closest("tr").remove();
+  });
 });
 
 socket.on("message", (msg) => {
   console.log(msg);
 });
-
+/////////////////////////////////////////////////
 socket.on("loadlast", async (msg) => {
   await loadpic.load(msg);
 
@@ -45,6 +80,7 @@ socket.on("loadlast", async (msg) => {
   });
 
   ///////////////////////////////
+
   const epage = document.getElementById("page");
   const pageobseve = new IntersectionObserver((entrys, Observe) => {
     entrys.forEach((entry) => {
