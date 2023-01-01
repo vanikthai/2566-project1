@@ -1,4 +1,11 @@
 <script defer src="./filemissing.js"></script>
+<div id="userset" data-user="<%= JSON.stringify(user) %>">
+  <%= user.name.username %>
+</div>
+
+<!-- /////////////////////////////// -->
+<%-include("nav.ejs")%> <%-include("tos.ejs")%>
+<br /><br />
 <div class="container">
   <div id="filesdel" data-file="<%= JSON.stringify(data) %>"></div>
 

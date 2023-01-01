@@ -13,7 +13,7 @@ module.exports = {
         return next();
       } else {
         req.flash("error_msg", "ไม่อนุญาตให้ใช้งาน");
-        return res.redirect("/");
+        return res.redirect("/main");
       }
     }
     req.flash("error_msg", "กรุณาลงชื่อเข้าใช้งาน");

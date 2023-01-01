@@ -8,7 +8,7 @@ module.exports = function (passport) {
       const sql = `SELECT * from users where username ='${email}'`;
       db(sql)
         .then((data) => {
-          if (data.length === 0) {
+          if (data.length === 0 || data[0].kind === "offline") {
             done(null, null, {
               message:
                 email + "อีเมลยังไม่ได้ลงทะเบียน หรือติดต่อผู้ดูแลระบบอนุญาต",
@@ -22,6 +22,7 @@ module.exports = function (passport) {
                 name: {
                   id: data[0].uuid,
                   username: data[0].username,
+                  kind: data[0].kind,
                 },
               });
             } else {

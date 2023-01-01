@@ -32,18 +32,20 @@ function showMsg(msg, title = "vanikthai.com") {
   let myToast = new bootstrap.Toast(myToastEl);
   myToast.show();
 }
+
 ////////////////////////////
 socket.on("upload", (msg) => {
   let newmsg = msg.username + " เพิ่มภาพ";
+
   showMsg(newmsg, "เพิ่มข้อมูล");
   picture.addEntry(msg);
 });
 
 socket.on("deletePicture", (msg) => {
-  showMsg(msg.pic, "ลบข้อมูล");
+  showMsg(msg.pic.pic, "ลบข้อมูล");
   let pics = document.querySelectorAll("#btnDel");
   pics.forEach((pic) => {
-    if (msg.pic !== pic.dataset.pic) return;
+    if (msg.pic.pic !== pic.dataset.pic) return;
     console.log(pic.dataset.pic);
     pic.closest("tr").remove();
   });
@@ -115,3 +117,10 @@ async function loadImage(imageUrl) {
   console.log("image loaded");
   return img;
 }
+
+document.getElementById("bell").addEventListener("click", () => {
+  let bellnum = document.getElementById("bellnum");
+  bellnum.innerText = 0;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  //console.log("bel click");
+});

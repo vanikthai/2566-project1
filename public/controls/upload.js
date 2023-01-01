@@ -7,8 +7,9 @@ export default class Upload {
   constructor(querySelectorString) {
     this.root = document.querySelector(querySelectorString);
     this.root.innerHTML = Upload.html();
-    this.id = "";
-    this.username = "";
+    this.total = 0;
+    this.current = 0;
+    this.imageupload = [];
   }
 
   static html() {
@@ -64,29 +65,38 @@ export default class Upload {
     progress.style.width = `${entry.fileLoaded}%`;
     progress.style.background = `green`;
     setTimeout(() => {
-      percent.style.display = `none`;
-      progress.style.display = `none`;
-      fname.style.display = `none`;
-      tum.style.display = `none`;
+      percent.closest("li").remove();
     }, 1000);
   }
 
   loadall(file) {
-    this.id = file.id;
-    this.username = file.username;
+    let newimg = [];
+    this.total = file.length;
     for (var i = 0; i < file.length; i++) {
-      let rand = Math.round(Math.random() * 400);
-      this.loadEatch(rand, file[i]);
+      newimg = [file[i], ...newimg];
     }
+
+    this.imageupload = newimg[Symbol.iterator]();
+    this.loadEatch();
   }
 
-  async loadEatch(idload, file) {
-    function getFileName(str) {
+  async loadEatch() {
+    this.current++;
+    let files = this.imageupload.next();
+    console.log(this.imageupload.length);
+    if (files.done) return;
+    let file = files.value;
+    let idload =
+      Math.round(Math.random() * 400) + Math.round(Math.random() * 400);
+    let getFileName = (str) => {
       if (str.length > 22) {
-        return str.substr(0, 11) + "..." + str.substr(-11);
+        return (
+          `[${this.current}/${this.total}] ${str.substr(0, 11)} ...` +
+          str.substr(-11)
+        );
       }
-      return str;
-    }
+      return `[${this.current}/${this.total}] ` + str;
+    };
     let vname = await getFileName(file.name);
 
     await this.root
@@ -159,6 +169,7 @@ export default class Upload {
         username: us.name.username,
       };
       Upload.sendIO(paySend);
+      this.loadEatch();
       /////////////////////////////
     };
   }
@@ -168,6 +179,7 @@ export default class Upload {
       "load",
       async () => {
         const uri = reader.result;
+
         imageresize(uri, TUMPIC)
           .then((img) => {
             let aimg = document.createElement("img");

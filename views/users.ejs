@@ -1,0 +1,20 @@
+<div id="userset" data-user="<%= JSON.stringify(user) %>">
+  <%= user.name.username %>
+</div>
+<%-include("nav.ejs")%> <%-include("tos.ejs")%>
+<br /><br /><br /><br />
+<div class="input-group rounded">
+  <input
+    type="search"
+    id="find"
+    class="form-control rounded"
+    placeholder="Search"
+    aria-label="Search"
+    aria-describedby="search-addon"
+  />
+  <span class="input-group-text border-0" id="search-addon">
+    <i class="fas fa-search"></i>
+  </span>
+</div>
+<div id="users"></div>
+<script type="module" src="./users.js"></script>

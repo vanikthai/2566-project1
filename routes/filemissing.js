@@ -24,5 +24,6 @@ module.exports = (req, res) => {
   }
   res.render("filemissing.ejs", {
     data: uploadfile || "No file error",
+    user: req.user,
   });
 };

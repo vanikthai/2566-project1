@@ -1,6 +1,7 @@
 const express = require("express");
 const route = express.Router();
 const fs = require("fs");
+
 const {
   ensureAuthenticated,
   forwardAuthenticated,
@@ -10,19 +11,25 @@ const {
 route.get("/", forwardAuthenticated, (req, res) => {
   res.render("index.ejs");
 });
+
 route.get("/main", ensureAuthenticated, (req, res) => {
   res.render("main.ejs", { user: req.user || "none" });
 });
 
-route.get("/filemissing", ensureAuthenticated, require("./filemissing"));
+route.get("/filemissing", ensureAdmin, require("./filemissing"));
 
-route.get("/register", (req, res) => {
+route.get("/users", ensureAdmin, (req, res) => {
+  res.render("users.ejs", { user: req.user || "none" });
+});
+
+route.get("/register", forwardAuthenticated, (req, res) => {
   res.render("register.ejs");
 });
 
 route.get("/upload", ensureAuthenticated, (req, res) => {
   res.render("upload.ejs", { user: req.user || "none" });
 });
+
 route.post("/upload", (req, res) => {
   const filename = "./public/uploads/" + req.headers["file-name"];
   req.on("data", (chunk) => {
@@ -32,6 +39,5 @@ route.post("/upload", (req, res) => {
 });
 
 route.post("/login", require("./login"));
-//route.post("/register", require("./register"));
 route.get("/logout", require("./logout"));
 module.exports = route;

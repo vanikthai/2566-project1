@@ -31,8 +31,26 @@ export default class BudgetTracker {
     return `
             <tr>
                 <td style="height:300px">
-                    <button type="button"  class="btn-rounded" id="btnDel" style="position: absolute;z-index: 2;right:10px;border-radius: 50%;"><i id="btnData"  class="fa fa-trash" aria-hidden="true"></i></button>
-                    <button type="button"  class="btn-rounded" id="btnDownload" style="position: absolute;z-index: 2;right:50px;border-radius: 50%;"><i id="btnDataDownload"  class="fa fa-download" aria-hidden="true"></i></button>
+                    <nav class="navbar navbar-light bg-light">
+                        <div class="container-fluid">
+                          <a class="navbar-brand"><div id="titlebar"></div></a>
+                          <form class="d-flex">
+                            <div class="nav-item dropstart">
+                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                                </svg>
+                              </a>
+                              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              <li><a id="btnDownload" class="dropdown-item" style="cursor: pointer;" >Download</a></li>
+                              <li><hr class="dropdown-divider"></li>
+                              <li><a id="btnDel" class="dropdown-item" style="cursor: pointer;" >ลบ</a></li>
+                              </ul>
+                            </li>
+                            </div>       
+                          </form>
+                        </div>
+                    </nav>
                     <div id="picture"></div>
                 </td>
             </tr>
@@ -46,44 +64,6 @@ export default class BudgetTracker {
     }
   }
 
-  addNew(entry = {}) {
-    this.root
-      .querySelector(".entries")
-      .insertAdjacentHTML("afterbegin", BudgetTracker.entryHtml());
-    row = this.root.querySelector(".entries tbody:first-of-type");
-
-    let type = entry.fileType.split("/");
-    let sdate = tdate(entry.date);
-    if (type[0] === "image") {
-      row.querySelector("#picture").innerHTML =
-        `
-        ${entry.user}[${entry.id_upload}] ${sdate}
-        <div  data-src='uploads/${entry.uploadName}' >
-        <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-        </div> 
-        </div> 
-            ` || "";
-    } else {
-      row.querySelector("#picture").innerHTML =
-        `<a target='_new' href='uploads/${entry.uploadName}' download >${type[0]}</a>` ||
-        "";
-    }
-    row.querySelector("#btnDownload").dataset.pic = entry.uploadName;
-    row.querySelector("#btnDataDownload").dataset.pic = entry.uploadName;
-    row.querySelector("#btnData").dataset.pic = entry.uploadName;
-    this.root.querySelector("#page").dataset.page = entry.page;
-    this.root.querySelector("#page").dataset.total = entry.tpages;
-    row.querySelector("#btnDel").addEventListener("click", (e) => {
-      let text = "(ต้องการลบข้อมุลหรือไม่!";
-      if (confirm(text) == true) this.onDeleteEntryBtnClick(e);
-    });
-    row.querySelector("#btnDownload").addEventListener("click", (e) => {
-      console.log("bonclick");
-      this.onDownloadEntryBtnClick(e);
-    });
-  }
-
   addEntry(entry = {}) {
     this.root
       .querySelector(".entries")
@@ -92,9 +72,11 @@ export default class BudgetTracker {
     let type = entry.fileType.split("/");
     let sdate = tdate(entry.date);
     if (type[0] === "image") {
+      row.querySelector(
+        "#titlebar"
+      ).innerHTML = `${entry.user}[${entry.id_upload}] `;
       row.querySelector("#picture").innerHTML =
-        `
-        ${entry.user}[${entry.id_upload}] ${sdate}
+        `${sdate}
         <div  data-src='uploads/${entry.uploadName}' >
         <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -107,9 +89,8 @@ export default class BudgetTracker {
         "";
     }
     row.querySelector("#btnDownload").dataset.pic = entry.uploadName;
-    row.querySelector("#btnDataDownload").dataset.pic = entry.uploadName;
-    row.querySelector("#btnData").dataset.pic = entry.uploadName;
     row.querySelector("#btnDel").dataset.pic = entry.uploadName;
+    row.querySelector("#btnDel").dataset.user = entry.user;
     this.root.querySelector("#page").dataset.page = entry.page;
     this.root.querySelector("#page").dataset.total = entry.tpages;
     row.querySelector("#btnDel").addEventListener("click", (e) => {
@@ -125,9 +106,20 @@ export default class BudgetTracker {
   save(e) {}
 
   onDeleteEntryBtnClick(e) {
+    let theuser = document.getElementById("userset").dataset.user;
+    const data = JSON.parse(theuser);
+    let payload = {
+      pic: e.target.dataset.pic,
+      user: e.target.dataset.user,
+    };
     if (!e.target.dataset.pic) return;
+    if (data.name.kind === "admin") {
+      socket.emit("deletepic", payload);
+    } else {
+      if (e.target.dataset.user !== data.name.username) return;
+      socket.emit("deletepic", payload);
+    }
 
-    socket.emit("deletepic", e.target.dataset.pic);
     e.target.closest("tr").remove();
   }
 

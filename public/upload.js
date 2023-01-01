@@ -8,8 +8,8 @@ form.addEventListener("click", () => {
 });
 
 fileInput.onchange = async ({ target }) => {
-  if (target.files.length > 20) {
-    alert("เลือกส่งได้ครั้งละ 20 files ครับ");
+  if (target.files.length > 100) {
+    alert("เลือกส่งได้ครั้งละ 100 files ครับ");
     target.preventDefault();
     return;
   }
@@ -19,7 +19,7 @@ fileInput.onchange = async ({ target }) => {
   let newloadname = "app" + Math.round(Math.random() * 400);
   let newload = document.createElement("div");
   newload.id = newloadname;
-  newload.innerText = "newupload";
+  newload.innerText = "กำลังดำเนินการ...";
   app.appendChild(newload);
 
   setTimeout(() => {

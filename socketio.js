@@ -6,7 +6,7 @@ module.exports = (io) => {
 
     socket.on("upload", upload);
 
-    socket.on("deletepic", deletepic);
+    socket.on("deletepic", delteUploadName);
 
     socket.on("renamepic", renamepic);
 
@@ -16,7 +16,49 @@ module.exports = (io) => {
 
     socket.on("loadstart", loadstart);
 
+    socket.on("finduser", finduser);
+
+    socket.on("updateuser", updateuser);
+
+    socket.on("resetpass", resetpass);
+
     ///////////////////////////////////////////////////////////
+
+    function resetpass(id) {
+      let sql = `UPDATE users SET password='sha1$1ad542da$1$4464432ee97f444c397f7fd2ece3638450bac978' WHERE uuid = '${id}'`;
+      socket.emit("message", sql);
+      db(sql)
+        .then((data) => {
+          socket.emit("resetpass", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function updateuser(payload) {
+      let sql = `UPDATE users SET kind='${payload.kind}' WHERE uuid = '${payload.id}'`;
+      socket.emit("message", sql);
+      db(sql)
+        .then((data) => {
+          socket.emit("updateuser", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function finduser(name) {
+      let sql = `SELECT * FROM users WHERE username like '${name}%';`;
+      db(sql)
+        .then((data) => {
+          socket.emit("finduser", data);
+          socket.emit("message", sql);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
 
     function loadstart(page, pages) {
       let sql = `SELECT count(id_upload) as 'max' FROM uploads;`;
@@ -44,9 +86,10 @@ module.exports = (io) => {
     }
 
     function delteUploadName(name) {
-      sql = `DELETE FROM uploads WHERE uploadName = '${name}';`;
+      sql = `DELETE FROM uploads WHERE uploadName = '${name.pic}' and user ='${name.user}';`;
       db(sql)
         .then((data) => {
+          deletepic(name);
           socket.emit("message", data);
         })
         .catch((error) => {
@@ -92,7 +135,7 @@ module.exports = (io) => {
 
     function deletepic(pic) {
       const fs = require("fs");
-      fs.unlink(__dirname + "/public/uploads/" + pic, function (err) {
+      fs.unlink(__dirname + "/public/uploads/" + pic.pic, function (err) {
         if (err) {
           io.emit("message", err);
         } else {
@@ -102,7 +145,6 @@ module.exports = (io) => {
           });
         }
       });
-      delteUploadName(pic);
     }
 
     function message(msg) {
