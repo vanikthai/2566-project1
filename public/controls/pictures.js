@@ -27,6 +27,7 @@ export default class BudgetTracker {
                         <div class="container-fluid">
                           <a class="navbar-brand"><div id="titlebar"></div></a>
                           <form class="d-flex">
+                          <a id="btnDetail" class="dropdown-item" style="cursor: pointer;" >รายละเอียด</a>
                             <div class="nav-item dropstart">
                               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
@@ -35,8 +36,9 @@ export default class BudgetTracker {
                               </a>
                               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                               <li><a id="btnDownload" class="dropdown-item" style="cursor: pointer;" >Download</a></li>
+                              <li><a id="btneditDetail" class="dropdown-item" style="cursor: pointer;" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom" >แก้ไขรายละเอียด</a></li>
                               <li><hr class="dropdown-divider"></li>
-                              <li><a id="btnDel" class="dropdown-item" style="cursor: pointer;" >Delete</a></li>
+                              <li><a id="btnDel" class="dropdown-item" style="cursor: pointer;" >ลบ</a></li>
                               </ul>
                             </li>
                             </div>       
@@ -51,6 +53,7 @@ export default class BudgetTracker {
   load(entries) {
     for (const entry of entries) {
       this.addEntry(entry);
+      console.log(entry);
     }
   }
 
@@ -63,22 +66,17 @@ export default class BudgetTracker {
     let type = entry.type.split("/");
 
     if (type[0] === "image") {
-      //////////////
-
-      row.querySelector("#picture").innerHTML =
-        `
-        '${tdate(new Date())}'
-        <div  data-src='uploads/${entry.filename}' >
-        <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-        </div>
-        </div>
-            ` || "";
-      title.innerHTML = ` ${entry.username}[news] `;
-
+      title.innerHTML = ` ${entry.username}`;
+      let sdate = tdate(new Date());
       let src = `uploads/${entry.filename}`;
       loadImage(src).then((images) => {
-        row.querySelector("#picture").innerHTML = images.outerHTML;
+        row.querySelector("#picture").innerHTML =
+          `${sdate} [${entry.id_upload}]
+        <figure>
+        ${images.outerHTML}
+        <figcaption><div id="detail${entry.id_upload}"></div></figcaption>
+        </figure> 
+            ` || "";
       });
 
       async function loadImage(imageUrl) {
@@ -104,6 +102,10 @@ export default class BudgetTracker {
            <a target='_new' href='uploads/${entry.filename}' >${type[1]}</a>
             ` || "";
     }
+    row.querySelector("#btneditDetail").dataset.id_upload = entry.id_upload;
+    row.querySelector("#btneditDetail").dataset.id_de = entry.id_de;
+    row.querySelector("#btnDetail").dataset.id_upload = entry.id_upload;
+    row.querySelector("#btnDetail").dataset.id_de = entry.id_de;
     row.querySelector("#btnDel").dataset.pic = entry.filename;
     row.querySelector("#btnDel").dataset.user = entry.username;
     row.querySelector("#btnDel").addEventListener("click", (e) => {

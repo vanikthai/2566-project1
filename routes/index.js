@@ -30,6 +30,10 @@ route.get("/upload", ensureAuthenticated, (req, res) => {
   res.render("upload.ejs", { user: req.user || "none" });
 });
 
+route.get("/headline", ensureAdmin, (req, res) => {
+  res.render("head.ejs", { user: req.user || "none" });
+});
+
 route.post("/upload", (req, res) => {
   const filename = "./public/uploads/" + req.headers["file-name"];
   req.on("data", (chunk) => {

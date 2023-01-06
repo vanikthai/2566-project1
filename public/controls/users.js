@@ -7,12 +7,12 @@ export default class User {
 
   static html() {
     return `
-            <table class="budget-tracker">
+            <table class="table table-striped">
                 <thead>
-                    <tr>
+                    <tr class="table-dark">
                         <th>USER</th>
                     </tr>
-                    <tr>
+                    <tr class="table-dark">
                         <th>KIND</th>
                     </tr>
                 </thead>

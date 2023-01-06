@@ -3,26 +3,107 @@ const db = require("./database");
 module.exports = (io) => {
   io.on("connection", (socket) => {
     socket.on("message", message);
-
+    ////////upload////////////
     socket.on("upload", upload);
-
     socket.on("deletepic", delteUploadName);
-
     socket.on("renamepic", renamepic);
-
+    /////////register////////////
     socket.on("register", register);
-
+    ////////login/////////////
     socket.on("login", login);
-
+    //////loadmain//////////
     socket.on("loadstart", loadstart);
-
+    //////user//////////
     socket.on("finduser", finduser);
-
     socket.on("updateuser", updateuser);
-
     socket.on("resetpass", resetpass);
+    /////head////
+    socket.on("addheads", addheads);
+    socket.on("loadhead", loadhead);
+    socket.on("delhead", delhead);
+    socket.on("updatehead", updatehead);
+    socket.on("addDescription", addDescription);
+    socket.on("updateDescription", updateDescription);
+    socket.on("showdis", showdisa);
 
     ///////////////////////////////////////////////////////////
+
+    function showdisa(payload) {
+      // socket.emit("message", payload);
+      let sql = `SELECT description.*,head.head, '${payload.id_upload}' as id_upload FROM description INNER JOIN head ON description.id_head = head.id_head WHERE id_de = '${payload.id_de}'; `;
+      db(sql)
+        .then((data) => {
+          socket.emit("showdis", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function updateDescription(payload) {
+      let sql = `UPDATE description SET id_head='${payload.id_head}', descriptions='${payload.descriptions}' WHERE id_de = '${payload.id_de}';`;
+      db(sql)
+        .then((data) => {
+          socket.emit("updateDescription", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error + ":" + sql);
+        });
+    }
+
+    function addDescription(file) {
+      const sql = `INSERT INTO description (id_head,descriptions) VALUES('${file.id_head}','${file.descriptions}')`;
+      db(sql)
+        .then((data) => {
+          socket.emit("addDescription", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+    function updatehead(payload) {
+      let sql = `UPDATE head SET head='${payload.head}' WHERE id_head = '${payload.id_head}';`;
+      db(sql)
+        .then((data) => {
+          socket.emit("updatehead", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function delhead(id_head) {
+      let sql = `DELETE  FROM head WHERE id_head = '${id_head}';`;
+      db(sql)
+        .then((data) => {
+          socket.emit("delhead", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function loadhead() {
+      let sql = `SELECT * FROM head;`;
+      db(sql)
+        .then((data) => {
+          socket.emit("loadhead", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
+
+    function addheads(head) {
+      const sql = `INSERT INTO head (head) VALUES('${head}')`;
+      db(sql)
+        .then((data) => {
+          socket.emit("addheads", data);
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
 
     function resetpass(id) {
       let sql = `UPDATE users SET password='sha1$1ad542da$1$4464432ee97f444c397f7fd2ece3638450bac978' WHERE uuid = '${id}'`;
@@ -119,14 +200,19 @@ module.exports = (io) => {
       };
       await renamepic(file.filename);
       await uploadSave(file);
-      io.emit("upload", payload);
+      //io.emit("upload", payload);
     }
 
     function uploadSave(file) {
-      const sql = `INSERT INTO uploads (uploadName,fileType,user,useid) VALUES('${file.filename}','${file.type}','${file.username}','${file.id}')`;
+      const sql = `INSERT INTO uploads (uploadName,fileType,user,useid,id_de) VALUES('${file.filename}','${file.type}','${file.username}','${file.id}','${file.id_de}')`;
       db(sql)
         .then((data) => {
-          socket.emit("message", data);
+          let payload = {
+            id_upload: data.insertId,
+            ...file,
+          };
+          // socket.emit("message", data);
+          io.emit("upload", payload);
         })
         .catch((error) => {
           socket.emit("message", error);

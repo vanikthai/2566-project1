@@ -10,6 +10,8 @@ export default class Upload {
     this.total = 0;
     this.current = 0;
     this.imageupload = [];
+    this.id_de = 0;
+    this.id_head = 1;
   }
 
   static html() {
@@ -39,7 +41,6 @@ export default class Upload {
   }
 
   static sendIO(entry = {}) {
-    console.log(entry);
     socket.emit("upload", entry);
   }
 
@@ -69,7 +70,10 @@ export default class Upload {
     }, 1000);
   }
 
-  loadall(file) {
+  loadall(payload) {
+    let file = payload.files;
+    this.id_de = payload.id_de;
+    this.id_head = payload.id_head;
     let newimg = [];
     this.total = file.length;
     for (var i = 0; i < file.length; i++) {
@@ -83,7 +87,6 @@ export default class Upload {
   async loadEatch() {
     this.current++;
     let files = this.imageupload.next();
-    console.log(this.imageupload.length);
     if (files.done) return;
     let file = files.value;
     let idload =
@@ -167,6 +170,8 @@ export default class Upload {
         type: lastname,
         id: us.name.id,
         username: us.name.username,
+        id_de: this.id_de,
+        id_head: this.id_head,
       };
       Upload.sendIO(paySend);
       this.loadEatch();

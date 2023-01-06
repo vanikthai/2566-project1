@@ -1,32 +1,60 @@
+import socket from "./controls/socket.js";
 const form = document.querySelector("form"),
   fileInput = document.querySelector(".file-input");
 ////////////////////////////////////////////////////////////////////////
 import Upload from "./controls/upload.js";
 // form click event
-form.addEventListener("click", () => {
+
+document.addEventListener("DOMContentLoaded", () => {
+  socket.emit("loadhead");
+});
+
+document.getElementById("fmupload").addEventListener("click", () => {
   fileInput.click();
 });
 
-fileInput.onchange = async ({ target }) => {
-  if (target.files.length > 100) {
-    alert("เลือกส่งได้ครั้งละ 100 files ครับ");
-    target.preventDefault();
-    return;
-  }
-
-  let file = target.files; //getting file [0] this means if user has selected multiple files then get first one only
+function tracUPloadName() {
   let app = document.getElementById("app");
   let newloadname = "app" + Math.round(Math.random() * 400);
   let newload = document.createElement("div");
   newload.id = newloadname;
   newload.innerText = "กำลังดำเนินการ...";
-  app.appendChild(newload);
 
-  setTimeout(() => {
-    let upfile = new Upload(`#${newloadname}`);
-    upfile.loadall(file);
-  }, 100);
+  app.appendChild(newload);
+  return newloadname;
+}
+
+let uploadfileadd = [];
+
+function runUPloads(file) {
+  uploadfileadd = file;
+  let id_head = document.getElementById("selectline").value || 1;
+  let descriptions = document.getElementById("selectdistrip").value || "";
+  // descriptions = descriptions.toString().replace(/%/g, "~~pct~~");
+  let payload = {
+    id_head,
+    descriptions: descriptions,
+  };
+  // console.log(payload);
+
+  socket.emit("addDescription", payload);
+  // let newloadname = tracUPloadName();
+  // setTimeout(() => {
+  //   let upfile = new Upload(`#${newloadname}`);
+  //   upfile.loadall(uploadfileadd);
+  // }, 100);
+}
+
+fileInput.onchange = async ({ target }) => {
+  let file = target.files;
+  runUPloads(file);
 };
+
+function handleDrop(e) {
+  let dt = e.dataTransfer;
+  let files = dt.files;
+  runUPloads(files);
+}
 
 let dropArea = document.getElementById("drop-area");
 
@@ -56,10 +84,31 @@ function unhighlight(e) {
 
 dropArea.addEventListener("drop", handleDrop, false);
 
-function handleDrop(e) {
-  let dt = e.dataTransfer;
-  let files = dt.files;
+socket.on("loadhead", (data) => {
+  let select = document.getElementById("selectline");
+  let i = 0;
+  data.forEach((el) => {
+    var opt = document.createElement("option");
+    if (i == 0) opt.setAttribute("selected", "selected");
+    i++;
+    opt.value = el.id_head;
+    opt.innerHTML = el.head;
+    select.appendChild(opt);
+  });
+});
 
-  let upfile = new Upload("#app");
-  upfile.loadall(files);
-}
+socket.on("addDescription", (data) => {
+  let id_head = document.getElementById("selectline").value || 1;
+  let id_de = data.insertId;
+  let payload = {
+    id_de,
+    id_head,
+    files: uploadfileadd,
+  };
+  // console.log(id_de);
+  let newloadname = tracUPloadName();
+  setTimeout(() => {
+    let upfile = new Upload(`#${newloadname}`);
+    upfile.loadall(payload);
+  }, 100);
+});
