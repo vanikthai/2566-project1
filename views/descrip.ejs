@@ -1,0 +1,53 @@
+Descrip
+<div id="userset" data-user="<%= JSON.stringify(user) %>"></div>
+<div id="dataset" data-des="<%= JSON.stringify(data) %>"></div>
+
+<div id="listdata" class="list-group"></div>
+
+<script>
+  let listgroup = document.getElementById("listdata");
+  let dataset = JSON.parse(document.getElementById("dataset").dataset.des);
+
+  dataset.forEach((data) => {
+    let btn = document.createElement("div");
+    btn.dataset.id_de = data.id_de;
+    btn.dataset.username = data.username;
+    btn.innerHTML =
+      data.descriptions + "<br>[" + data.username + "]" + datetime(data.indate);
+    btn.className = "list-group-item list-group-item-action";
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      console.log(e.target.dataset.id_de);
+    });
+    listgroup.appendChild(btn);
+  });
+
+  function datetime(Obj) {
+    let dateObj = new Date(Obj);
+    let hhr = dateObj.getHours() || 12;
+    let monthNames = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม.",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+    let parts = {
+      date: dateObj.getDate().toString().padStart(2, "0"),
+      month: monthNames[dateObj.getMonth()],
+      year: dateObj.getFullYear() + 543,
+      hour: hhr.toString().padStart(2, "0"),
+      minute: dateObj.getMinutes().toString().padStart(2, "0"),
+      amOrPm: dateObj.getHours() < 12 ? "AM" : "PM",
+    };
+    return `${parts.date} ${parts.month} ${parts.year} ${parts.hour}:${parts.minute} น. ${parts.amOrPm}`;
+  }
+</script>

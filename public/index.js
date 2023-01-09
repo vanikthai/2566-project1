@@ -1,37 +1,15 @@
 import socket from "./controls/socket.js";
 import Picture from "./controls/pictures.js";
 import Loadpic from "./controls/loadpic.js";
+import { showMsg } from "./submain/showmsg.js";
 const picture = new Picture("#pictures");
 const loadpic = new Loadpic("#pictures");
 const perpage = 10;
 let showdisforEdit = false;
+let timestop = true;
 document.addEventListener("DOMContentLoaded", () => {
-  if (!window.Notification) {
-    console.log("Browser does not support notifications.");
-  } else {
-    console.log("Browser does support notifications.");
-    console.log(window.Notification.permission);
-    if (window.Notification.permission === "granted") {
-      console.log("We have permission!");
-    } else if (window.Notification.permission !== "denied") {
-      window.Notification.requestPermission().then((permission) => {
-        console.log(permission);
-      });
-    }
-    // display message here
-  }
   socket.emit("loadstart", 0, perpage);
 });
-
-function showMsg(msg, title = "vanikthai.com") {
-  let myToastEl = document.getElementById("liveToast");
-  let ToastText = document.getElementById("toastbody");
-  let toastheader = document.getElementById("toastheader");
-  ToastText.innerHTML = msg;
-  toastheader.innerText = title;
-  let myToast = new bootstrap.Toast(myToastEl);
-  myToast.show();
-}
 
 ////////////////////////////
 socket.on("upload", (msg) => {
@@ -53,9 +31,11 @@ socket.on("deletePicture", (msg) => {
 
 socket.on("message", (msg) => {
   console.log(msg);
+  showMsg(msg, "ปรับปรุงข้อมูล");
 });
 
 socket.on("updateDescription", (msg) => {
+  showMsg("ปรับปรุงรายละเอียดเรียบร้อย", "ปรับปรุงข้อมูล");
   console.log(msg);
 });
 
@@ -103,11 +83,65 @@ socket.on("loadlast", async (msg) => {
   await loadpic.load(msg);
 
   btnEvent();
+  imgobseve();
+  nextpageobser();
+  //figcaption_obsere();
+});
 
+function figcaption_obsere() {
+  const figcaps = document.querySelectorAll("figcaption");
+  let pageOption = {};
+  const figobseve = new IntersectionObserver((entrys, Observe) => {
+    entrys.forEach((entry) => {
+      if (!entry.isIntersecting) {
+        timestop = true;
+        return;
+      }
+      // loadnextpage(entry.target);
+      let payload = {
+        id_de: entry.target.dataset.id_de,
+        id_upload: entry.target.dataset.id_upload,
+      };
+
+      setTimeout(() => {
+        timestop = false;
+        console.log("show");
+        if (!timestop) socket.emit("showdis", payload);
+      }, 2000);
+      //console.log(entry.target);
+      figobseve.unobserve(entry.target);
+    });
+  }, pageOption);
+  figcaps.forEach((figcap) => {
+    figobseve.observe(figcap);
+  });
+}
+function nextpageobser() {
+  let pageOption = {};
+  const epage = document.getElementById("page");
+  const pageobseve = new IntersectionObserver((entrys, Observe) => {
+    entrys.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      loadnextpage(entry.target);
+      pageobseve.unobserve(entry.target);
+    });
+  }, pageOption);
+
+  function loadnextpage(page) {
+    let nextpage = page.getAttribute("data-page");
+    nextpage++;
+    let totalpage = page.getAttribute("data-total");
+    if (nextpage > totalpage - 1) return;
+    socket.emit("loadstart", nextpage, perpage);
+  }
+
+  pageobseve.observe(epage);
+}
+function imgobseve() {
   const images = document.querySelectorAll("[data-src]");
-  const imageOption = {};
+  let imageOption = {};
 
-  const imgobseve = new IntersectionObserver((entrys, Observe) => {
+  let imgobseve = new IntersectionObserver((entrys, Observe) => {
     entrys.forEach((entry) => {
       if (!entry.isIntersecting) return;
       preloadingimage(entry.target);
@@ -126,29 +160,7 @@ socket.on("loadlast", async (msg) => {
   images.forEach((image) => {
     imgobseve.observe(image);
   });
-
-  ///////////////////////////////
-
-  const epage = document.getElementById("page");
-  const pageobseve = new IntersectionObserver((entrys, Observe) => {
-    entrys.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      loadnextpage(entry.target);
-      pageobseve.unobserve(entry.target);
-    });
-  }, imageOption);
-
-  function loadnextpage(page) {
-    let nextpage = page.getAttribute("data-page");
-    nextpage++;
-    let totalpage = page.getAttribute("data-total");
-    if (nextpage > totalpage - 1) return;
-    socket.emit("loadstart", nextpage, perpage);
-  }
-
-  pageobseve.observe(epage);
-});
-
+}
 async function loadImage(imageUrl) {
   let img;
   const imageLoadPromise = new Promise((resolve) => {
@@ -191,8 +203,8 @@ function btnUpdateDestrip() {
   socket.emit("updateDescription", payload);
   showdisforEdit = false;
   des.value = "";
-
-  console.log(payload);
+  showMsg("upadate", "detail update");
+  // console.log(payload);
 }
 
 ////////////////////////
@@ -230,31 +242,6 @@ function nextPrev(n) {
   showTab(currentTab);
 }
 
-function validateForm() {
-  // This function deals with validation of the form fields
-  var x,
-    y,
-    i,
-    valid = true;
-  x = document.getElementsByClassName("tab");
-  y = x[currentTab].getElementsByTagName("input");
-  // A loop that checks every input field in the current tab:
-  for (i = 0; i < y.length; i++) {
-    // If a field is empty...
-    if (y[i].value == "") {
-      // add an "invalid" class to the field:
-      y[i].className += " invalid";
-      // and set the current valid status to false
-      valid = false;
-    }
-  }
-  // If the valid status is true, mark the step as finished and valid:
-  if (valid) {
-    document.getElementsByClassName("step")[currentTab].className += " finish";
-  }
-  return valid; // return the valid status
-}
-
 function fixStepIndicator(n) {
   var i,
     x = document.getElementsByClassName("step");
@@ -263,7 +250,7 @@ function fixStepIndicator(n) {
   }
   x[n].className += " active";
 }
-//////////////////////////
+// //////////////////////////
 
 document.getElementById("prevBtn").addEventListener("click", () => {
   nextPrev(-1);

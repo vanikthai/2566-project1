@@ -52,7 +52,7 @@ module.exports = (io) => {
     }
 
     function addDescription(file) {
-      const sql = `INSERT INTO description (id_head,descriptions) VALUES('${file.id_head}','${file.descriptions}')`;
+      const sql = `INSERT INTO description (id_head,descriptions,username,uuid) VALUES('${file.id_head}','${file.descriptions}','${file.username}','${file.uuid}')`;
       db(sql)
         .then((data) => {
           socket.emit("addDescription", data);

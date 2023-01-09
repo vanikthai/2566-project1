@@ -35,7 +35,7 @@ export default class BudgetTracker {
                         <div class="container-fluid">
                           <a class="navbar-brand"><div id="titlebar"></div></a>
                           <form class="d-flex">
-                          <a id="btnDetail" class="dropdown-item" style="cursor: pointer;" >รายละเอียด</a>
+                         
                             <div class="nav-item dropstart">
                               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
@@ -54,6 +54,7 @@ export default class BudgetTracker {
                         </div>
                     </nav>
                     <div id="picture"></div>
+                     
                 </td>
             </tr>
         `;
@@ -83,7 +84,9 @@ export default class BudgetTracker {
         <span class="visually-hidden">Loading...</span>
         </div> 
         </div> 
-        <figcaption><div id="detail${entry.id_upload}"></div></figcaption>
+        <figcaption><div id="detail${entry.id_upload}">
+        <a id="btnDetail" class="btn btn-light btn-sm float-end" style="cursor: pointer;margin-button: 5px;" >รายละเอียด...</a>
+        </div></figcaption>
         </figure> 
             ` || "";
     } else {
@@ -91,7 +94,10 @@ export default class BudgetTracker {
         `<a target='_new' href='uploads/${entry.uploadName}' download >${type[0]}</a>` ||
         "";
     }
-    row.querySelector("#btneditDetail").dataset.id_upload = entry.id_upload;
+
+    row.querySelector("figcaption").dataset.id_upload = entry.id_upload;
+    row.querySelector("figcaption").dataset.id_de = entry.id_de;
+
     row.querySelector("#btneditDetail").dataset.id_de = entry.id_de;
     row.querySelector("#btnDetail").dataset.id_upload = entry.id_upload;
     row.querySelector("#btnDetail").dataset.id_de = entry.id_de;
@@ -101,25 +107,13 @@ export default class BudgetTracker {
     this.root.querySelector("#page").dataset.page = entry.page;
     this.root.querySelector("#page").dataset.total = entry.tpages;
     row.querySelector("#btnDel").addEventListener("click", (e) => {
-      let text = "(ต้องการลบข้อมุลหรือไม่!";
+      let text = "ต้องการลบข้อมูลหรือไม่!";
       if (confirm(text) == true) this.onDeleteEntryBtnClick(e);
     });
     row.querySelector("#btnDownload").addEventListener("click", (e) => {
       this.onDownloadEntryBtnClick(e);
     });
-    // row.querySelector("#btnDetail").addEventListener("click", (e) => {
-    //   this.detailBtnClick(e);
-    // });
   }
-
-  // detailBtnClick(e) {
-  //   let payload = {
-  //     id_de: e.target.dataset.id_de,
-  //     id_upload: e.target.dataset.id_upload,
-  //   };
-  //   console.log(payload);
-  //   socket.emit("showdis", payload);
-  // }
 
   onDeleteEntryBtnClick(e) {
     let theuser = document.getElementById("userset").dataset.user;

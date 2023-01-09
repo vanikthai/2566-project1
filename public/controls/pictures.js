@@ -27,7 +27,6 @@ export default class BudgetTracker {
                         <div class="container-fluid">
                           <a class="navbar-brand"><div id="titlebar"></div></a>
                           <form class="d-flex">
-                          <a id="btnDetail" class="dropdown-item" style="cursor: pointer;" >รายละเอียด</a>
                             <div class="nav-item dropstart">
                               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
@@ -46,6 +45,7 @@ export default class BudgetTracker {
                         </div>
                     </nav>
                     <div id="picture"></div>
+                     <a id="btnDetail" class="btn btn-light btn-sm float-end" onclick="this.style.visibility='hidden'" style="cursor: pointer;margin-button: 5px;" >รายละเอียด...</a>
                 </td>
             </tr>
         `;
@@ -74,7 +74,8 @@ export default class BudgetTracker {
           `${sdate} [${entry.id_upload}]
         <figure>
         ${images.outerHTML}
-        <figcaption><div id="detail${entry.id_upload}"></div></figcaption>
+        <figcaption><div id="detail${entry.id_upload}">
+        </div></figcaption>
         </figure> 
             ` || "";
       });

@@ -11,9 +11,9 @@ export default class User {
                 <thead>
                     <tr class="table-dark">
                         <th>USER</th>
-                    </tr>
-                    <tr class="table-dark">
                         <th>KIND</th>
+                        <th>reset Pass.</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody class="entries"></tbody>

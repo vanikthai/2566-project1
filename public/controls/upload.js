@@ -3,6 +3,8 @@ import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import imageresize from "./imageresize.js";
 const socket = io();
 const TUMPIC = 1248;
+const uploadfilesize = 1;
+const CHANK_SIZE = 10000;
 export default class Upload {
   constructor(querySelectorString) {
     this.root = document.querySelector(querySelectorString);
@@ -108,7 +110,7 @@ export default class Upload {
     let type = file.type.split("/");
     if (type[0] === "image") {
       let filesize = Math.round(file.size / 1024 / 1024);
-      if (filesize > 2) {
+      if (filesize > uploadfilesize) {
         this.postimageprofile(idload, file);
       } else {
         this.tumimage(idload, file);
@@ -126,7 +128,7 @@ export default class Upload {
 
     fread.onload = async (ev) => {
       ////////////////////////
-      const CHANK_SIZE = 10000;
+
       const chankCount = ev.target.result.byteLength / CHANK_SIZE;
       const fname = data.name.split(".");
       const lastname = data.type;

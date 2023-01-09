@@ -30,6 +30,8 @@ route.get("/upload", ensureAuthenticated, (req, res) => {
   res.render("upload.ejs", { user: req.user || "none" });
 });
 
+route.get("/descrip/:id", ensureAuthenticated, require("./descrip"));
+
 route.get("/headline", ensureAdmin, (req, res) => {
   res.render("head.ejs", { user: req.user || "none" });
 });
