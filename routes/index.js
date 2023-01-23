@@ -30,7 +30,13 @@ route.get("/upload", ensureAuthenticated, (req, res) => {
   res.render("upload.ejs", { user: req.user || "none" });
 });
 
-route.get("/descrip/:id", ensureAuthenticated, require("./descrip"));
+route.get("/descrip/:id", ensureAuthenticated, (req, res) => {
+  res.render("descrip.ejs", { user: req.user, id: req.params.id });
+});
+
+route.get("/showon/:id", ensureAuthenticated, (req, res) => {
+  res.render("showon.ejs", { user: req.user, id: req.params.id });
+});
 
 route.get("/headline", ensureAdmin, (req, res) => {
   res.render("head.ejs", { user: req.user || "none" });

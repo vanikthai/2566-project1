@@ -25,10 +25,92 @@ module.exports = (io) => {
     socket.on("addDescription", addDescription);
     socket.on("updateDescription", updateDescription);
     socket.on("showdis", showdisa);
+    socket.on("sohwDisId", sohwDisId);
+    socket.on("showon", showon);
 
     ///////////////////////////////////////////////////////////
 
+    function showon(page, pages, id_de) {
+      let sql = `SELECT count(id_upload) as 'max' FROM uploads WHERE id_de = '${id_de}' ;`;
+      db(sql)
+        .then((data) => {
+          let totalpages = Math.round(data[0].max / pages);
+          let nexpage = page * pages;
+          let sql1;
+          if (page == 0) {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM uploads WHERE id_de = '${id_de}'  ORDER BY id_upload DESC LIMIT ${page},${pages};`;
+          } else {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM uploads  WHERE id_de = '${id_de}' ORDER BY id_upload DESC LIMIT ${nexpage},${pages};`;
+          }
+          socket.emit("message", sql);
+          socket.emit("message", sql1);
+          db(sql1)
+            .then((data1) => {
+              socket.emit("showon", data1);
+            })
+            .catch((error) => {
+              socket.emit("message", sql1);
+            });
+        })
+        .catch((error) => {
+          socket.emit("message", sql);
+        });
+    }
+
+    function sohwDisId(payload) {
+      let sq = `SELECT count(id_de) as 'max' FROM description WHERE id_head = '${payload.id_head}';`;
+      let pages = payload.pages;
+      let page = payload.page;
+      db(sq)
+        .then((data) => {
+          let totalpages = Math.round(data[0].max / pages);
+          let nexpage = page * pages;
+          let sql1;
+          if (page == 0) {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head on head.id_head = description.id_head  WHERE description.id_head = '${payload.id_head}' ORDER BY id_de DESC LIMIT ${page},${pages};`;
+          } else {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head on head.id_head = description.id_head  WHERE description.id_head = '${payload.id_head}' ORDER BY id_de DESC LIMIT ${nexpage},${pages};`;
+          }
+          db(sql1)
+            .then((data1) => {
+              socket.emit("sohwDisId", data1);
+              socket.emit("message", payload);
+            })
+            .catch((error) => {
+              socket.emit("message", sql1);
+            });
+        })
+        .catch((error) => {
+          socket.emit("message", sql);
+        });
+    }
+
     function showdisa(payload) {
+      //   let sq = `SELECT count(id_de) as 'max' FROM description WHERE id_de = '${payload.id_de}';`;
+      //   let pages = payload.pages;
+      //   let page = payload.page;
+      //   db(sq)
+      //     .then((data) => {
+      //       let totalpages = Math.round(data[0].max / pages);
+      //       let nexpage = page * pages;
+      //       let sql1;
+      //       if (page == 0) {
+      //         sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head.id_head = description.id_head  ORDER BY id_de DESC LIMIT ${page},${pages};`;
+      //       } else {
+      //         sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head.id_head = description.id_head ORDER BY id_de DESC LIMIT ${nexpage},${pages};`;
+      //       }
+      //       db(sql1)
+      //         .then((data1) => {
+      //           socket.emit("loadlast", data1);
+      //         })
+      //         .catch((error) => {
+      //           socket.emit("showdis", sql1);
+      //         });
+      //     })
+      //     .catch((error) => {
+      //       socket.emit("message", sql);
+      //     });
+
       // socket.emit("message", payload);
       let sql = `SELECT description.*,head.head, '${payload.id_upload}' as id_upload FROM description INNER JOIN head ON description.id_head = head.id_head WHERE id_de = '${payload.id_de}'; `;
       db(sql)
