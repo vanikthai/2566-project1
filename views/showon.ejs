@@ -1,5 +1,40 @@
 <%-include("nav1.ejs")%> <br /><br /><br />
 <div id="userset" data-user="<%= JSON.stringify(user) %>"></div>
 <div id="dataset" data-id="<%= JSON.stringify(id) %>"></div>
+
 <div id="pictures"></div>
-<script type="module" src="/showon.js"></script>
+<%-include("listDescrip.ejs")%>
+
+<div
+  class="offcanvas offcanvas-bottom"
+  tabindex="-1"
+  id="offcanvasBottom"
+  aria-labelledby="offcanvasBottomLabel"
+>
+  <div class="offcanvas-header">
+    <button
+      id="btnClose"
+      type="button"
+      class="btn-close text-reset"
+      data-bs-dismiss="offcanvas"
+      aria-label="Close"
+    ></button>
+  </div>
+  <div class="offcanvas-body small">
+    <div class="form-floating">
+      <textarea
+        id="selectdistrip"
+        class="form-control"
+        placeholder="Leave a comment here"
+        id="floatingTextarea2"
+        style="height: 100px"
+      ></textarea>
+      <label for="floatingTextarea2">แก้ไขรายการ</label>
+    </div>
+  </div>
+  <button id="btnSave" type="button" class="btn btn-secondary btn-sm">
+    บันทึก
+  </button>
+</div>
+
+<script defer type="module" src="/showon.js"></script>

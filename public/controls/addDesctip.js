@@ -2,12 +2,17 @@ import tdate from "./tdate.js";
 
 export default class addDedctip {
   constructor(payload) {
-    this.head = payload.head;
+    this.head = payload.head || "new";
     this.descriptions = payload.descriptions;
-    this.indate = payload.indate;
+    this.indate = payload.indate || new Date();
     this.id_de = payload.id_de;
+    this.kind = payload.kind || "after";
     this.listdata = document.getElementById("listdata");
-    this.listdata.appendChild(this.card());
+    if (this.kind === "after") {
+      this.listdata.appendChild(this.card());
+    } else {
+      listdata.insertBefore(this.card(), listdata.firstChild);
+    }
     let next = document.getElementById("nextdata");
     next.dataset.nexpage = payload.page + 1;
     next.dataset.total = payload.tpages;

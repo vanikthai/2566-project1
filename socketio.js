@@ -27,8 +27,64 @@ module.exports = (io) => {
     socket.on("showdis", showdisa);
     socket.on("sohwDisId", sohwDisId);
     socket.on("showon", showon);
+    socket.on("headline", headline);
+    socket.on("findHeadline", findHeadline);
+    socket.on("delprofilepic", delprofilepic);
+    socket.on("delnull_description", delnull_description);
 
     ///////////////////////////////////////////////////////////
+    //SELECT description.* FROM description  LEFT  JOIN uploads ON description.id_de = uploads.id_de WHERE uploads.id_de IS NULL;
+    function delnull_description() {
+      let sql1 = `DELETE description.* FROM description  LEFT  JOIN uploads ON description.id_de = uploads.id_de WHERE uploads.id_de IS NULL;`;
+      db(sql1)
+        .then((data1) => {
+          socket.emit("delnull_description", data1);
+        })
+        .catch((error) => {
+          socket.emit("message", sql1 + error);
+        });
+    }
+
+    function findHeadline(find) {
+      let sql1 = `SELECT *,1 as page,1 as tpages  FROM description inner join head on head.id_head = description.id_head WHERE description.descriptions like '%${find}%' ORDER BY id_de DESC;`;
+      socket.emit("message", sql1);
+      db(sql1)
+        .then((data1) => {
+          socket.emit("findHeadline", data1);
+        })
+        .catch((error) => {
+          socket.emit("message", sql1 + error);
+        });
+    }
+
+    function headline(payload) {
+      let sq = `SELECT count(id_de) as 'max' FROM description;`;
+      let pages = payload.pages;
+      let page = payload.page;
+      db(sq)
+        .then((data) => {
+          let totalpages = Math.round(data[0].max / pages);
+          let nexpage = page * pages;
+          let sql1;
+          if (page == 0) {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head on head.id_head = description.id_head  ORDER BY id_de DESC LIMIT ${page},${pages};`;
+          } else {
+            sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head on head.id_head = description.id_head  ORDER BY id_de DESC LIMIT ${nexpage},${pages};`;
+          }
+          socket.emit("message", sq);
+          socket.emit("message", sql1);
+          db(sql1)
+            .then((data1) => {
+              socket.emit("headline", data1);
+            })
+            .catch((error) => {
+              socket.emit("message", sql1);
+            });
+        })
+        .catch((error) => {
+          socket.emit("message", error);
+        });
+    }
 
     function showon(page, pages, id_de) {
       let sql = `SELECT count(id_upload) as 'max' FROM uploads WHERE id_de = '${id_de}' ;`;
@@ -86,32 +142,6 @@ module.exports = (io) => {
     }
 
     function showdisa(payload) {
-      //   let sq = `SELECT count(id_de) as 'max' FROM description WHERE id_de = '${payload.id_de}';`;
-      //   let pages = payload.pages;
-      //   let page = payload.page;
-      //   db(sq)
-      //     .then((data) => {
-      //       let totalpages = Math.round(data[0].max / pages);
-      //       let nexpage = page * pages;
-      //       let sql1;
-      //       if (page == 0) {
-      //         sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head.id_head = description.id_head  ORDER BY id_de DESC LIMIT ${page},${pages};`;
-      //       } else {
-      //         sql1 = `SELECT *,${page} as page,${totalpages} as tpages  FROM description inner join head.id_head = description.id_head ORDER BY id_de DESC LIMIT ${nexpage},${pages};`;
-      //       }
-      //       db(sql1)
-      //         .then((data1) => {
-      //           socket.emit("loadlast", data1);
-      //         })
-      //         .catch((error) => {
-      //           socket.emit("showdis", sql1);
-      //         });
-      //     })
-      //     .catch((error) => {
-      //       socket.emit("message", sql);
-      //     });
-
-      // socket.emit("message", payload);
       let sql = `SELECT description.*,head.head, '${payload.id_upload}' as id_upload FROM description INNER JOIN head ON description.id_head = head.id_head WHERE id_de = '${payload.id_de}'; `;
       db(sql)
         .then((data) => {
@@ -138,6 +168,11 @@ module.exports = (io) => {
       db(sql)
         .then((data) => {
           socket.emit("addDescription", data);
+          let sendall = {
+            id_de: data.insertId,
+            ...file,
+          };
+          io.emit("headlineadd", sendall);
         })
         .catch((error) => {
           socket.emit("message", error);
@@ -299,6 +334,20 @@ module.exports = (io) => {
         .catch((error) => {
           socket.emit("message", error);
         });
+    }
+
+    function delprofilepic(pic) {
+      const fs = require("fs");
+      fs.unlink(__dirname + "/public/users/" + pic.pic, function (err) {
+        if (err) {
+          socket.emit("message", err);
+        } else {
+          socket.emit("delprofilepic", {
+            pic,
+            msg: " has been Deleted",
+          });
+        }
+      });
     }
 
     function deletepic(pic) {

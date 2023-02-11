@@ -1,7 +1,12 @@
 <%-include("nav1.ejs")%> <br /><br /><br />
 <div id="userset" data-user="<%= JSON.stringify(user) %>"></div>
-<div id="dataset" data-id="<%= JSON.stringify(id) %>"></div>
 <%-include("listDescrip.ejs")%>
+  <form  id="finddescrip" class="d-flex">
+        <input id="findText" class="form-control me-2" autocomplete="off" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">ค้นหา</button>
+      </form> 
+    </div>
+<br>
 <div id="listdata" class="row row-cols-1 row-cols-md-3 g-4"></div>
 <div id="nextdata" class="row row-cols-1 row-cols-md-3 g-4">
   <div class="col">
@@ -12,4 +17,4 @@
     </div>
   </div>
 </div>
-<script type="module" src="/descrip1.js"></script>
+<script type="module" src="/headline.js"></script>

@@ -32,8 +32,9 @@ export default class BudgetTracker {
             <tr>
                 <td style="height:300px">
                     <nav class="navbar navbar-light bg-light">
-                        <div class="container-fluid">
-                          <a class="navbar-brand"><div id="titlebar"></div></a>
+                        <div class="container-fluid"> 
+                        <a id="profile" class="navbar-brand"></a>
+                        <div id="titlebar"></div>
                           <form class="d-flex">
                          
                             <div class="nav-item dropstart">
@@ -67,7 +68,37 @@ export default class BudgetTracker {
     }
   }
 
-  addEntry(entry = {}) {
+  loadProfile(profile, id) {
+    try {
+      let Url = `url(http://vanikthai.com/users/${id}.jpg)`;
+      let imgUrl = `url(http://vanikthai.com/users/${id}.jpg)`;
+      var img = new Image();
+      img.src = Url;
+      if ((img.height = 0)) return;
+
+      profile.style.backgroundImage = imgUrl;
+      profile.style.backgroundSize = "cover";
+      profile.style.backgroundPosition = "center";
+      profile.style.borderRadius = "50%";
+      profile.style.height = "50px";
+      profile.style.width = "50px";
+    } catch {}
+
+    // try {
+    //   fetch(imgUrl)
+    //     .then(() => {
+    //       let img = `url(${imgUrl})`;
+    //       // console.log(img);
+    //     })
+    //     .catch((e) => {
+    //       // profile.innerHTML = "No Image";
+    //       console.log(e);
+    //     });
+    // } catch {}
+  }
+
+  async addEntry(entry = {}) {
+    // console.log(entry);
     this.root
       .querySelector(".entries")
       .insertAdjacentHTML("beforeend", BudgetTracker.entryHtml());
@@ -76,10 +107,11 @@ export default class BudgetTracker {
     let sdate = tdate(entry.date);
     if (type[0] === "image") {
       row.querySelector("#titlebar").innerHTML = `${entry.user} `;
+
       row.querySelector("#picture").innerHTML =
         `${sdate} [${entry.id_upload}]
         <figure>
-        <div id="imgsload"  data-src='uploads/${entry.uploadName}' >
+        <div id="imgsload"  data-src='/uploads/${entry.uploadName}' >
         <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
         </div> 

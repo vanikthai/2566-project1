@@ -2,24 +2,58 @@ import socket from "./controls/socket.js";
 import Picture from "./controls/pictures.js";
 import Loadpic from "./controls/loadpic.js";
 import { showMsg } from "./submain/showmsg.js";
+import { btnEvent } from "./submain/btnEvent.js";
+import { nextpageobser } from "./submain/nextpageobser.js";
+import { imgobseve } from "./submain/imgobseve.js";
+import TAB from "./submain/tab.js";
+let tab = new TAB();
 const picture = new Picture("#pictures");
 const loadpic = new Loadpic("#pictures");
 const perpage = 10;
 let showdisforEdit = false;
 let timestop = true;
-document.addEventListener("DOMContentLoaded", () => {
-  socket.emit("loadstart", 0, perpage);
-});
 
 ////////////////////////////
-socket.on("upload", (msg) => {
+socket.on("upload", upload);
+socket.on("deletePicture", deletePicture);
+socket.on("message", message);
+socket.on("updateDescription", updateDescription);
+socket.on("showdis", showdis);
+socket.on("loadlast", loadlast);
+/////////////////////////////////////////////////
+document.addEventListener("DOMContentLoaded", loadstart);
+document.getElementById("bell").addEventListener("click", bel);
+document.getElementById("btnto").addEventListener("click", btnto);
+
+function loadstart() {
+  socket.emit("loadstart", 0, perpage);
+  serviceworker();
+}
+
+function serviceworker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/sw.js", {
+        scope: "/",
+      })
+      .then((registration) => {
+        console.log("SW Registered!");
+      })
+      .catch((error) => {
+        console.log("SW Registeration Fail");
+        console.log(error);
+      });
+  } else console.log("Your browser does not support the Service-Worker!");
+}
+
+function upload(msg) {
   let newmsg = msg.username + " เพิ่มภาพ";
   showMsg(newmsg, "เพิ่มข้อมูล");
   picture.addEntry(msg);
   btnEvent();
-});
+}
 
-socket.on("deletePicture", (msg) => {
+function deletePicture(msg) {
   showMsg(msg.pic.pic, "ลบข้อมูล");
   let pics = document.querySelectorAll("#btnDel");
   pics.forEach((pic) => {
@@ -27,19 +61,19 @@ socket.on("deletePicture", (msg) => {
     console.log(pic.dataset.pic);
     pic.closest("tr").remove();
   });
-});
+}
 
-socket.on("message", (msg) => {
+function message(msg) {
   console.log(msg);
   showMsg(msg, "ปรับปรุงข้อมูล");
-});
+}
 
-socket.on("updateDescription", (msg) => {
+function updateDescription(msg) {
   showMsg("ปรับปรุงรายละเอียดเรียบร้อย", "ปรับปรุงข้อมูล");
   console.log(msg);
-});
+}
 
-socket.on("showdis", (msg) => {
+function showdis(msg) {
   if (showdisforEdit) {
     nextPrev(4);
     document.getElementById("selectline").value = msg[0].id_head;
@@ -52,142 +86,26 @@ socket.on("showdis", (msg) => {
     let content = decodeURI(msg[0].descriptions);
     detail.innerHTML = msg[0].head + "<br/>" + content;
   }
-});
-
-/////////////////////////////////////////////////
-function btnEvent() {
-  document.querySelectorAll("#btnDetail").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      showdisforEdit = false;
-      let payload = {
-        id_de: e.target.dataset.id_de,
-        id_upload: e.target.dataset.id_upload,
-      };
-      socket.emit("showdis", payload);
-    });
-  });
-
-  document.querySelectorAll("#btneditDetail").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      showdisforEdit = true;
-      let payload = {
-        id_de: e.target.dataset.id_de,
-        id_upload: e.target.dataset.id_upload,
-      };
-      socket.emit("showdis", payload);
-    });
-  });
 }
 
-socket.on("loadlast", async (msg) => {
+async function loadlast(msg) {
   await loadpic.load(msg);
-
   btnEvent();
   imgobseve();
-  nextpageobser();
-  //figcaption_obsere();
-});
-
-function figcaption_obsere() {
-  const figcaps = document.querySelectorAll("figcaption");
-  let pageOption = {};
-  const figobseve = new IntersectionObserver((entrys, Observe) => {
-    entrys.forEach((entry) => {
-      if (!entry.isIntersecting) {
-        timestop = true;
-        return;
-      }
-      // loadnextpage(entry.target);
-      let payload = {
-        id_de: entry.target.dataset.id_de,
-        id_upload: entry.target.dataset.id_upload,
-      };
-
-      setTimeout(() => {
-        timestop = false;
-        console.log("show");
-        if (!timestop) socket.emit("showdis", payload);
-      }, 2000);
-      //console.log(entry.target);
-      figobseve.unobserve(entry.target);
-    });
-  }, pageOption);
-  figcaps.forEach((figcap) => {
-    figobseve.observe(figcap);
-  });
-}
-function nextpageobser() {
-  let pageOption = {};
-  const epage = document.getElementById("page");
-  const pageobseve = new IntersectionObserver((entrys, Observe) => {
-    entrys.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      loadnextpage(entry.target);
-      pageobseve.unobserve(entry.target);
-    });
-  }, pageOption);
-
-  function loadnextpage(page) {
-    let nextpage = page.getAttribute("data-page");
-    nextpage++;
-    let totalpage = page.getAttribute("data-total");
-    if (nextpage > totalpage - 1) return;
-    socket.emit("loadstart", nextpage, perpage);
-  }
-
-  pageobseve.observe(epage);
-}
-function imgobseve() {
-  const images = document.querySelectorAll("[data-src]");
-  let imageOption = {};
-
-  let imgobseve = new IntersectionObserver((entrys, Observe) => {
-    entrys.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      preloadingimage(entry.target);
-      imgobseve.unobserve(entry.target);
-    });
-  }, imageOption);
-
-  function preloadingimage(img) {
-    let src = img.getAttribute("data-src");
-    if (!src) return;
-    loadImage(src).then((images) => {
-      img.innerHTML = images.outerHTML;
-    });
-  }
-
-  images.forEach((image) => {
-    imgobseve.observe(image);
-  });
-}
-async function loadImage(imageUrl) {
-  let img;
-  const imageLoadPromise = new Promise((resolve) => {
-    img = new Image();
-    img.onload = resolve;
-
-    img.classList = "img-fluid";
-    img.src = imageUrl;
-  });
-
-  await imageLoadPromise;
-  console.log("image loaded");
-  return img;
+  nextpageobser(socket, perpage);
 }
 
-document.getElementById("bell").addEventListener("click", () => {
+function bel() {
   let bellnum = document.getElementById("bellnum");
   bellnum.innerText = 0;
   window.scrollTo({ top: 0, behavior: "smooth" });
-  //console.log("bel click");
-});
+}
 
-document.getElementById("btnto").addEventListener("click", (e) => {
-  nextPrev(4);
+function btnto() {
+  tab.nextPrev(4);
   document.getElementById("selectline").value = 1;
   document.getElementById("selectdistrip").value = "";
-});
+}
 
 function btnUpdateDestrip() {
   if (!showdisforEdit) return;
@@ -207,55 +125,13 @@ function btnUpdateDestrip() {
   // console.log(payload);
 }
 
-////////////////////////
-var currentTab = 0; // Current tab is set to be the first tab (0)
-showTab(currentTab); // Display the current tab
-
-function showTab(n) {
-  var x = document.getElementsByClassName("tab");
-  x[n].style.display = "block";
-  if (n == 0) {
-    document.getElementById("prevBtn").style.display = "none";
-  } else {
-    document.getElementById("prevBtn").style.display = "inline";
-  }
-  if (n == x.length - 1) {
-    document.getElementById("nextBtn").innerHTML = "สิ้นสุด";
-  } else {
-    document.getElementById("nextBtn").innerHTML = "ต่อไป";
-  }
-  fixStepIndicator(n);
-}
-
-function nextPrev(n) {
-  var x = document.getElementsByClassName("tab");
-  //if (n == 1 && !validateForm()) return false;
-  x[currentTab].style.display = "none";
-  currentTab = currentTab + n;
-  if (currentTab >= x.length) {
-    if (currentTab === 3) btnUpdateDestrip();
-    currentTab = 0;
-    showTab(currentTab);
-    // document.getElementById("regForm").submit();
-    return false;
-  }
-  showTab(currentTab);
-}
-
-function fixStepIndicator(n) {
-  var i,
-    x = document.getElementsByClassName("step");
-  for (i = 0; i < x.length; i++) {
-    x[i].className = x[i].className.replace(" active", "");
-  }
-  x[n].className += " active";
-}
-// //////////////////////////
+tab.showTab(0); // Display the current tab
 
 document.getElementById("prevBtn").addEventListener("click", () => {
-  nextPrev(-1);
+  tab.nextPrev(-1);
 });
 
 document.getElementById("nextBtn").addEventListener("click", () => {
-  nextPrev(1);
+  tab.nextPrev(1);
+  if (tab.currentTab === 3) btnUpdateDestrip();
 });

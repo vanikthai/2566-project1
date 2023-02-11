@@ -1,5 +1,6 @@
 import socket from "./controls/socket.js";
 import Loadpic from "./controls/loadpic.js";
+import addHeadlineMenu from "./controls/addHeadlineMenu.js";
 const loadpic = new Loadpic("#pictures");
 const perpage = 10;
 let showdisforEdit = false;
@@ -8,8 +9,25 @@ const id_de = JSON.parse(document.getElementById("dataset").dataset.id);
 
 document.addEventListener("DOMContentLoaded", () => {
   socket.emit("showon", 0, perpage, id_de);
+  socket.emit("loadhead");
 });
 
+document.getElementById("btnSave").addEventListener("click", () => {
+  document.getElementById("btnClose").click();
+  // if (!showdisforEdit) return;
+  let des = document.getElementById("selectdistrip");
+  let id_head = des.dataset.id_head;
+  let id_de = des.dataset.id_de;
+  let descriptions = des.value;
+  let payload = {
+    id_de,
+    id_head,
+    descriptions,
+  };
+  socket.emit("updateDescription", payload);
+  // showdisforEdit = false;
+  des.value = "";
+});
 socket.on("message", (msg) => {
   console.log(msg);
 });
@@ -22,11 +40,12 @@ socket.on("showon", (data) => {
 });
 socket.on("showdis", (msg) => {
   if (showdisforEdit) {
-    nextPrev(4);
-    document.getElementById("selectline").value = msg[0].id_head;
+    //  nextPrev(4);
+    // document.getElementById("selectline").value = msg[0].id_head;
     let des = document.getElementById("selectdistrip");
     des.value = msg[0].descriptions;
     des.dataset.id_de = msg[0].id_de;
+    des.dataset.id_head = msg[0].id_head;
   } else {
     let id = `detail${msg[0].id_upload}`;
     let detail = document.getElementById(id);
@@ -35,6 +54,9 @@ socket.on("showdis", (msg) => {
   }
 });
 
+socket.on("loadhead", (data) => {
+  addHeadlineMenu(data);
+});
 function imgobseve() {
   const images = document.querySelectorAll("[data-src]");
   let imageOption = {};

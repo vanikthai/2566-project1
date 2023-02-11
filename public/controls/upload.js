@@ -31,8 +31,9 @@ export default class Upload {
               <div id="tum${id}" class="name"></div>
               <div id="filename${id}" class="name"><span>${file}</span></div>
               <span id="percen${id}" class="percen">${id}</span>
-            </div>
-            <div class="progress-bar">
+              </div>
+              <div class="progress-bar">
+              <div id="total_process${id}" class="progress" style=""></div>
               <div id="process${id}" class="progress" style=""></div>
             </div>
           </div>
@@ -45,14 +46,19 @@ export default class Upload {
   static sendIO(entry = {}) {
     socket.emit("upload", entry);
   }
-
   updateEntry(entry = {}) {
     let idname = `#percen${entry.idload}`;
     let idprocess = `#process${entry.idload}`;
+    let total_process = `#total_process${entry.idload}`;
+    let totalpercen = (this.current * 100) / this.total;
     const percent = this.root.querySelector(idname);
     const progress = this.root.querySelector(idprocess);
+    const tprogress = this.root.querySelector(total_process);
     percent.innerHTML = entry.fileLoaded + "% " + entry.status;
+
     progress.style.width = `${entry.fileLoaded}%`;
+    tprogress.style.background = `red`;
+    tprogress.style.width = `${totalpercen}%`;
   }
 
   endEntry(entry = {}) {
@@ -139,7 +145,7 @@ export default class Upload {
           chankId * CHANK_SIZE + CHANK_SIZE
         );
 
-        await fetch("http://vanikthai.com/upload", {
+        await fetch("https://vanikthai.com/upload", {
           method: "POST",
           headers: {
             "content-type": "application/octec-stream",

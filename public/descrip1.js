@@ -1,6 +1,6 @@
 import socket from "./controls/socket.js";
 import addDedctip from "./controls/addDesctip.js";
-
+import addHeadlineMenu from "./controls/addHeadlineMenu.js";
 const descrip = {
   id_head: JSON.parse(document.getElementById("dataset").dataset.id),
   pages: 5,
@@ -22,6 +22,7 @@ const descrip = {
 
   showdataid() {
     socket.emit("sohwDisId", this.payload);
+    socket.emit("loadhead");
   },
 };
 
@@ -43,6 +44,10 @@ socket.on("sohwDisId", (data) => {
 
 socket.on("message", (data) => {
   console.log(data);
+});
+
+socket.on("loadhead", (data) => {
+  addHeadlineMenu(data);
 });
 
 function nextpageobser() {

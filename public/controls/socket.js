@@ -1,8 +1,8 @@
-const socket = io("ws://vanikthai.com", {
-    withCredentials: true,
-    extraHeaders: {
-      vanikthaiapp: "abcd",
-    },
-  }); 
+const socket = io("wss://vanikthai.com", {
+  withCredentials: true,
+  extraHeaders: {
+    vanikthaiapp: "abcd",
+  },
+});
 
-export default socket
+export default socket;

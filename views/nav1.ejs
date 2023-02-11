@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
   <div class="container-fluid">
     <button
+      id="mainnav1"
       class="navbar-toggler"
       type="button"
       data-bs-toggle="collapse"
@@ -17,6 +18,27 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="/main">Home</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/setting"
+            >ตั้งค่า</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/headline"
+            >รายการ</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            data-bs-toggle="offcanvas"
+            href="#offcanvasList"
+            role="button"
+            aria-controls="offcanvasList"
+          >
+            แยกรายการ
+          </a>
+        </li>
         <li class="nav-item dropdown">
           <a
             class="nav-link dropdown-toggle"
@@ -30,7 +52,9 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="/users">ผู้ใช้งาน</a></li>
-            <li><a class="dropdown-item" href="/headline">หัวข้อเรื่อง</a></li>
+            <li>
+              <a class="dropdown-item" href="/headlinesetting">หัวข้อเรื่อง</a>
+            </li>
             <li><hr class="dropdown-divider" /></li>
             <li><a class="dropdown-item" href="/filemissing">ขยะภาพ</a></li>
           </ul>
@@ -68,3 +92,4 @@
     </div>
   </div>
 </nav>
+<script type="module" src="/nav1.js"></script>

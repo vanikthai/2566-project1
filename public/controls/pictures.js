@@ -25,7 +25,7 @@ export default class BudgetTracker {
                 <td style="height:300px">
                     <nav class="navbar navbar-light bg-light">
                         <div class="container-fluid">
-                          <a class="navbar-brand"><div id="titlebar"></div></a>
+                          <a id="profile" class="navbar-brand"><div id="titlebar"></div></a>
                           <form class="d-flex">
                             <div class="nav-item dropstart">
                               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -68,7 +68,7 @@ export default class BudgetTracker {
     if (type[0] === "image") {
       title.innerHTML = ` ${entry.username}`;
       let sdate = tdate(new Date());
-      let src = `uploads/${entry.filename}`;
+      let src = `/uploads/${entry.filename}`;
       loadImage(src).then((images) => {
         row.querySelector("#picture").innerHTML =
           `${sdate} [${entry.id_upload}]
@@ -109,6 +109,10 @@ export default class BudgetTracker {
     row.querySelector("#btnDetail").dataset.id_de = entry.id_de;
     row.querySelector("#btnDel").dataset.pic = entry.filename;
     row.querySelector("#btnDel").dataset.user = entry.username;
+
+    // let profile = row.querySelector("#profile");
+    // this.loadProfile(profile, entry.id);
+
     row.querySelector("#btnDel").addEventListener("click", (e) => {
       let text = "(ต้องการลบข้อมุลหรือไม่!";
       if (confirm(text) == true) this.onDeleteEntryBtnClick(e);
@@ -120,6 +124,23 @@ export default class BudgetTracker {
   }
 
   save(e) {}
+
+  loadProfile(profile, id) {
+    try {
+      let Url = `url(http://vanikthai.com/users/${id}.jpg)`;
+      let imgUrl = `url(http://vanikthai.com/users/${id}.jpg)`;
+      var img = new Image();
+      img.src = Url;
+      if ((img.height = 0)) return;
+
+      profile.style.backgroundImage = imgUrl;
+      profile.style.backgroundSize = "cover";
+      profile.style.backgroundPosition = "center";
+      profile.style.borderRadius = "50%";
+      profile.style.height = "50px";
+      profile.style.width = "50px";
+    } catch {}
+  }
 
   onDownloadEntryBtnClick(e) {
     let pname = e.target.dataset.pic;

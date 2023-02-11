@@ -1,7 +1,7 @@
-export const btnEvent = function (socket) {
+export function btnEvent() {
   document.querySelectorAll("#btnDetail").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      // showdisforEdit = false;
+      showdisforEdit = false;
       let payload = {
         id_de: e.target.dataset.id_de,
         id_upload: e.target.dataset.id_upload,
@@ -12,7 +12,7 @@ export const btnEvent = function (socket) {
 
   document.querySelectorAll("#btneditDetail").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      // showdisforEdit = true;
+      showdisforEdit = true;
       let payload = {
         id_de: e.target.dataset.id_de,
         id_upload: e.target.dataset.id_upload,
@@ -20,4 +20,4 @@ export const btnEvent = function (socket) {
       socket.emit("showdis", payload);
     });
   });
-};
+}
